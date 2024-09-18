@@ -3,9 +3,15 @@ import path from "path";
 import { marked } from "marked";
 import { NextRequest, NextResponse } from "next/server";
 
+marked.setOptions({
+  gfm: true, // GitHub Flavored Markdown 활성화
+  breaks: true, // 줄바꿈 시 <br> 태그를 추가하도록 설정
+});
+
 const OBSIDIAN_DIR = "/home/leedo/바탕화면/source/DooSyncBrain/DooBrain/Root";
 const OBSIDIAN_LINK_REGEX = /\[([^\]]+)\]\(Root/g;
 const REMARK_REGEX = /%%[^%]+%%/g;
+const TAG_REGEX = /---[\s\S]*?---\s*/;
 const LAST_PULL_TIME_FILE = "/tmp/last_pull_time";
 
 // Types
@@ -26,10 +32,19 @@ const removeRemark = (content: string): string => {
   return content.replace(REMARK_REGEX, "");
 };
 
+function removeTagsSection(content: string): string {
+  // 정규식을 사용하여 ---로 둘러싸인 tags 섹션을 제거
+  const result = content.replace(TAG_REGEX, "");
+  return result;
+}
+
 const processContent = async (content: string): Promise<string> => {
   const convertedContent = convertObsidianLinks(content);
   const removedRemarkContent = removeRemark(convertedContent);
-  const result = await marked(removedRemarkContent);
+  console.log(removedRemarkContent);
+  const removedTagsContent = removeTagsSection(removedRemarkContent);
+  console.log(removedTagsContent);
+  const result = await marked(removedTagsContent);
   return result;
 };
 

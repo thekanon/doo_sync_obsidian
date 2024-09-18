@@ -17,7 +17,7 @@ const config: Config = {
         DEFAULT: {
           css: {
             color: theme("colors.gray.800"),
-            maxWidth: "65ch",
+            maxWidth: "fit-content",
             lineHeight: "1.75",
             a: {
               color: theme("colors.blue.600"),
