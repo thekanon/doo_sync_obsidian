@@ -65,11 +65,12 @@ export default async function Home({ params }: { params: Params }) {
         </div>
       </div>
     );
-  } catch (error: any) {
-    console.error("Error in Home component:", error);
+  } catch (error: unknown) {
+    error instanceof Error &&
+      console.error("Error in Home component:", error);
 
     // 비공개 페이지 에러일 경우 '권한이 없습니다' 출력
-    const errorMessage = error.message === "This page is private."
+    const errorMessage = (error as Error).message === "This page is private."
       ? "권한이 없습니다."
       : "없는 문서이거나 아직 작성되지 않았습니다.";
 

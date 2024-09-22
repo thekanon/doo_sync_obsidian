@@ -8,10 +8,7 @@ const execAsync = util.promisify(exec);
 const OBSIDIAN_DIR = "/home/leedo/바탕화면/source/DooSyncBrain/DooBrain/Root";
 const SECRET_TOKEN = process.env.WEBHOOK_SECRET_TOKEN;
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   // Only allow POST requests
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
