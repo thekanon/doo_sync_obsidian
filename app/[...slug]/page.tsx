@@ -31,7 +31,7 @@ function SanitizedContent({ content }: { content: string }) {
 
 // Obsidian 데이터를 가져오는 함수
 async function fetchObsidianData(path: string): Promise<ObsidianData> {
-  const res = await fetch(`http://localhost:3000/api/${path}`, { next: { revalidate: 60 } });
+  const res = await fetch(`http://localhost:33000/api/${path}`, { next: { revalidate: 60 } });
 
   if (!res.ok) {
     throw new Error(`Failed to fetch data: ${res.statusText}`);

@@ -78,10 +78,10 @@ const readAndProcessFile = async (filePath: string): Promise<string> => {
 
 export async function GET(
   request: NextRequest,
-  context: { params: Params }
+  { params }: { params: Params }
 ): Promise<NextResponse<ApiResponse>> {
   try {
-    const { path: notePath } = context.params;
+    const { path: notePath } = params;
     const fullPath = path.join(OBSIDIAN_DIR, ...notePath);
 
     const htmlContent = await readAndProcessFile(fullPath);
@@ -117,8 +117,7 @@ const verifyGithubWebhook = (req: NextRequest, body: string): boolean => {
 };
 
 export async function POST(
-  request: NextRequest,
-  context: { params: Params }
+  request: NextRequest
 ): Promise<NextResponse<ApiResponse>> {
   // github webhook으로 push가 발생하면 이곳에서 git pull을 실행하고 last pull time을 업데이트
   try {
@@ -134,8 +133,6 @@ export async function POST(
     }
 
     // step 2: webhook이 push 이벤트인지 확인
-    const jsonBody = JSON.parse(body);
-
     console.log("Pulling latest changes from git repository");
     const event = request.headers.get("x-github-event");
     console.log("Event:", event);
