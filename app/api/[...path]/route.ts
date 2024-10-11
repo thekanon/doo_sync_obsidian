@@ -13,7 +13,7 @@ marked.setOptions({
   breaks: true, // 줄바꿈 시 <br> 태그를 추가하도록 설정
 });
 
-const OBSIDIAN_DIR = "/home/leedo/바탕화면/source/DooSyncBrain/DooBrain/Root";
+const OBSIDIAN_DIR = process.env.REPO_PATH+"/Root" as string;
 const OBSIDIAN_LINK_REGEX = /\[([^\]]+)\]\(Root/g;
 const OBSIDIAN_INDEX_REGEX = /\[\[([^\|]+)\|([^\]]+)\]\]/g;
 

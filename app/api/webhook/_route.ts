@@ -5,7 +5,7 @@ import { exec } from "child_process";
 import util from "util";
 
 const execAsync = util.promisify(exec);
-const OBSIDIAN_DIR = "/home/leedo/바탕화면/source/DooSyncBrain/DooBrain/Root";
+const OBSIDIAN_DIR = process.env.REPO_PATH+"/Root" as string;
 const SECRET_TOKEN = process.env.WEBHOOK_SECRET_TOKEN;
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
