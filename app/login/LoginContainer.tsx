@@ -65,7 +65,7 @@ const LoginPage = () => {
       ui.start('#firebaseui-auth-container', {
         callbacks: {
           // Called when the user has been successfully signed in.
-          signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+          signInSuccessWithAuthResult: function(authResult) {
             if (authResult.user) {
               console.log(authResult.user);
             }

@@ -2,7 +2,6 @@ import crypto from "crypto";
 import fs from "fs/promises";
 import path from "path";
 import { exec, ExecException } from "child_process";
-import { promisify } from "util";
 import { marked } from "marked";
 import { NextRequest, NextResponse } from "next/server";
 
