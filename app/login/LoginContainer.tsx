@@ -63,42 +63,51 @@ const LoginPage = () => {
 
       const ui = firebaseui.auth.AuthUI.getInstance() || new firebaseui.auth.AuthUI(firebase.auth());
       ui.start('#firebaseui-auth-container', {
+        callbacks: {
+          // Called when the user has been successfully signed in.
+          signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+            if (authResult.user) {
+              console.log(authResult.user);
+            }
+            if (authResult.additionalUserInfo) {
+              console.log(authResult.additionalUserInfo);
+            }
+            // Do not redirect.
+            return false;
+          }
+        },
+    
         signInOptions: [
           {
-            // Google 제공자는 원탭 로그인을 지원하기 위해 Firebase Console에서 활성화되어야 합니다.
             provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
             clientId: '756100070951-a5imkvop1rbjb8poeb1q7tnedkd2872d.apps.googleusercontent.com'
           },
+          {
+            provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+            requireDisplayName: false,
+            signInMethod: 'password',
+            disableSignUp: {
+              status: false
+            }
+
+          },
+          firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
         ],
-        // 원탭 로그인 자격 증명 도우미를 활성화하는 데 필요합니다.
-        credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO
+        signInFlow: 'popup',
+        credentialHelper: firebaseui.auth.CredentialHelper.NONE,
+        adminRestrictedOperation: {
+          status: true,
+        }
+    
+    
       });
+      
+
 
       ui.disableAutoSignIn();
     }
-    if (typeof window !== 'undefined') {
-      firebase.auth().onAuthStateChanged(function (user) {
-        if (user) {
-          // 사용자가 로그인함
-          user.getIdToken().then(function (accessToken) {
-            console.log("사용자 토큰 획득", accessToken);
-            setUser(user);
-            setLoading(false);
-          }).catch((error) => {
-            console.error("사용자 토큰 획득 오류", error);
-            setError(error.message);
-            setLoading(false);
-          });
-        } else {
-          // 사용자가 로그아웃함
-          setUser(null);
-          setLoading(false);
-          setError(null);
-          console.log("사용자가 로그아웃함");
-        }
-      });
-    }
   }, [user]);
+
 
   const handleSignOut = () => {
     if (typeof window !== 'undefined') {
@@ -113,7 +122,7 @@ const LoginPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <h1 className="text-3xl font-bold mb-8">내 멋진 앱에 오신 것을 환영합니다</h1>
+      <h1 className="text-3xl font-bold mb-8">관리자 로그인을 할 수 있습니다.</h1>
       <div id="sign-in-status" className="text-xl mb-4">
         {user ? '로그인됨' : '로그아웃됨'}
       </div>

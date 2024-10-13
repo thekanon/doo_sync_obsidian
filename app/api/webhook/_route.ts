@@ -1,10 +1,10 @@
 // pages/api/webhook.ts
 import fs from "fs/promises";
 import { NextApiRequest, NextApiResponse } from "next";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import util from "util";
 
-const execAsync = util.promisify(exec);
+const execFileAsync = util.promisify(execFile);
 const OBSIDIAN_DIR = process.env.REPO_PATH+"/Root" as string;
 const SECRET_TOKEN = process.env.WEBHOOK_SECRET_TOKEN;
 
@@ -22,20 +22,32 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
   try {
     // Execute git pull
-    const { stdout, stderr } = await execAsync("git pull", {
-      cwd: OBSIDIAN_DIR,
-    });
+    const { stdout, stderr } = await execFileAsync('git', ['pull'], { cwd: OBSIDIAN_DIR });
+    
     console.log("Git pull output:", stdout);
-    if (stderr) console.error("Git pull error:", stderr);
+    
+    if (stderr) {
+      console.log("Git pull additional info:", stderr);
+    }
 
     // Update last update time
     await updateLastPullTime();
 
     res.status(200).json({ message: "Repository updated successfully" });
   } catch (error) {
-    console.error("Error during git pull:", error);
+    if (error instanceof Error) {
+      console.error("Error during git pull:", error.message);
+      // Check if the error is from execFileAsync
+      if ('code' in error && typeof error.code === 'number') {
+        return res.status(500).json({ 
+          error: "Failed to update repository", 
+          details: `Git exited with code ${error.code}. ${error.message}`
+        });
+      }
+    }
     res.status(500).json({ error: "Failed to update repository" });
   }
+
 }
 
 async function updateLastPullTime() {

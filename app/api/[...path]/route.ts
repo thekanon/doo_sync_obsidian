@@ -1,12 +1,24 @@
 import crypto from "crypto";
 import fs from "fs/promises";
 import path from "path";
-import { exec } from "child_process";
+import { exec, ExecException } from "child_process";
 import { promisify } from "util";
 import { marked } from "marked";
 import { NextRequest, NextResponse } from "next/server";
 
-const execAsync = promisify(exec);
+// 커스텀 execAsync 함수 정의
+const execAsync = (command: string, options?: { cwd?: string }): Promise<{ stdout: string; stderr: string; exitCode: number | null }> => {
+  return new Promise((resolve) => {
+    exec(command, options, (error: ExecException | null, stdout: string | Buffer, stderr: string | Buffer) => {
+      resolve({
+        stdout: stdout.toString(),
+        stderr: stderr.toString(),
+        exitCode: error ? error.code || 1 : 0
+      });
+    });
+  });
+};
+
 
 marked.setOptions({
   gfm: true, // GitHub Flavored Markdown 활성화
@@ -119,11 +131,9 @@ const verifyGithubWebhook = (req: NextRequest, body: string): boolean => {
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse>> {
-  // github webhook으로 push가 발생하면 이곳에서 git pull을 실행하고 last pull time을 업데이트
   try {
     const body = await request.text();
 
-    // step 1: github에서 온 webhook인지 확인
     if (!verifyGithubWebhook(request, body)) {
       console.error("Invalid webhook signature");
       return NextResponse.json(
@@ -132,37 +142,34 @@ export async function POST(
       );
     }
 
-    // step 2: webhook이 push 이벤트인지 확인
     console.log("Pulling latest changes from git repository");
     const event = request.headers.get("x-github-event");
     console.log("Event:", event);
     if (event !== "push") {
-      console.error("Webhook action is not push, skipping git pull");
+      console.log("Webhook action is not push, skipping git pull");
       return NextResponse.json(
         { content: "Webhook processed successfully" },
         { status: 200 }
       );
     }
 
-    // step 3: git pull 실행
-    try {
-      const { stdout, stderr } = await execAsync("git pull origin main", {
-        cwd: REPO_PATH,
-      });
-      console.log("Git pull output:", stdout);
-      if (stderr) console.error("Git pull stderr:", stderr);
-    } catch (error) {
-      console.error("Error during git pull:", error);
+    const { stdout, stderr, exitCode } = await execAsync("git pull origin main", {
+      cwd: REPO_PATH,
+    });
+    
+    console.log("Git pull output:", stdout);
+    if (stderr) console.log("Git pull :", stderr);
+    
+    if (exitCode !== 0) {
+      console.error(`Git pull failed with exit code ${exitCode}`);
       return NextResponse.json(
         { error: "Failed to pull latest changes" },
         { status: 500 }
       );
     }
 
-    // step 4: last pull time 업데이트
     await fs.writeFile(LAST_PULL_TIME_FILE, Date.now().toString());
 
-    // step 5: webhook 처리 완료
     return NextResponse.json(
       { content: "Webhook processed and git pull executed successfully" },
       { status: 200 }
