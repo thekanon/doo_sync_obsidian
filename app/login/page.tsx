@@ -1,6 +1,6 @@
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 
-const LoginContainer = dynamic(() => import('./LoginContainer'), {
+const LoginContainer = dynamic(() => import("./LoginContainer"), {
   ssr: false,
 });
 

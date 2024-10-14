@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-// import { cookies } from "next/headers";
-// import { admin } from '@/firebase/firebaseAdmin';
 
 // Middleware function
 export function middleware(request: NextRequest) {

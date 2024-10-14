@@ -2,6 +2,7 @@
 
 # dependencies
 .env
+serviceAccountKey.json
 /node_modules
 /.pnp
 .pnp.js
