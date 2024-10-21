@@ -1,51 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuth, Auth } from "firebase-admin/auth";
-import { initializeApp, getApps, cert, App } from "firebase-admin/app";
-import serviceAccountKey from "@/serviceAccountKey.json";
+// firebaseAdmin.ts
+import { Auth, DecodedIdToken } from "firebase-admin/auth";
+import { App } from "firebase-admin/app";
+import { serialize } from "cookie";
+import { initializeFirebaseAdmin } from "@/app/lib/firebaseAdmin";
 
-let app: App | undefined;
 let auth: Auth | undefined;
 
-const initializeFirebaseAdmin = (): void => {
-  if (getApps().length === 0) {
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY
-      ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n")
-      : undefined;
-
-    if (!privateKey) {
-      console.error(
-        "FIREBASE_PRIVATE_KEY is not set in the environment variables"
-      );
-      throw new Error("Firebase configuration error");
-    }
-
-    try {
-      app = initializeApp({
-        credential: cert({
-          ...serviceAccountKey,
-          privateKey: privateKey,
-        }),
-        databaseURL: "https://doowiki-874c3-default-rtdb.firebaseio.com",
-      });
-      auth = getAuth(app);
-      console.log("Firebase Admin SDK initialized successfully");
-    } catch (error) {
-      console.error("Failed to initialize Firebase Admin SDK:", error);
-      throw error;
-    }
-  } else {
-    app = getApps()[0];
-    auth = getAuth(app);
-  }
-
-  if (!auth) {
-    console.error("Firebase Auth object is not defined");
-  }
+export const verifyIdToken = async (token: string): Promise<DecodedIdToken> => {
+  const auth = initializeFirebaseAdmin();
+  return auth.verifyIdToken(token);
 };
 
 export async function POST(req: NextRequest) {
   try {
-    initializeFirebaseAdmin();
+    auth = initializeFirebaseAdmin();
 
     if (!auth) {
       console.error("Firebase Auth is not initialized");
@@ -75,7 +44,6 @@ export async function POST(req: NextRequest) {
       console.log("Token decoded successfully:", decodedToken);
       const uid = decodedToken.uid;
 
-      // `auth.getUser()` 호출 전에 auth가 제대로 정의되었는지 확인
       if (!auth) {
         console.error("Auth is undefined");
         return NextResponse.json(
@@ -84,18 +52,33 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      // 사용자 정보 가져오기
       const userRecord = await auth.getUser(uid);
       console.log("User info:", userRecord);
 
-      // 사용자 정보를 응답에 담아서 반환
       const userInfo = {
         uid: userRecord.uid,
         email: userRecord.email,
         displayName: userRecord.displayName,
       };
 
-      return NextResponse.json({ user: userInfo }, { status: 200 });
+      // 토큰을 httpOnly 쿠키에 저장
+      const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict" as const,
+        maxAge: 3600, // 1 hour
+        path: "/",
+      };
+
+      const cookie = serialize("token", token, cookieOptions);
+
+      // 응답 객체 생성
+      const response = NextResponse.json({ user: userInfo }, { status: 200 });
+
+      // 쿠키 설정
+      response.headers.set("Set-Cookie", cookie);
+
+      return response;
     } catch (verifyError) {
       console.error("Token verification failed:", verifyError);
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
