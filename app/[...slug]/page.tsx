@@ -66,7 +66,6 @@ async function getAuthInfo(): Promise<{ user: string } | null> {
   try {
     const cookieStore = cookies();
     const token = cookieStore.get("token")?.value;
-    console.log("Token:", token);
     const response = await fetch("http://localhost:33000/api/auth/me", {
       method: "GET",
       headers: {
@@ -75,8 +74,6 @@ async function getAuthInfo(): Promise<{ user: string } | null> {
       },
       credentials: "include", // 쿠키 포함
     });
-
-    console.log("Auth info:", response.ok);
 
     if (!response.ok) {
       if (response.status === 401) {
@@ -108,7 +105,6 @@ export default async function Home({ params }: { params: Params }) {
         <div className="prose prose-lg p-3">
           <h1>인증 필요</h1>
           <p>이 페이지를 보려면 로그인이 필요합니다.</p>
-          {/* 여기에 로그인 링크나 버튼을 추가할 수 있습니다 */}
         </div>
       );
     }
