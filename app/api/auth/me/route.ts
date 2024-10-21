@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import { getAuth } from "firebase-admin/auth";
 import { initializeFirebaseAdmin } from "@/app/lib/firebaseAdmin";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const authInfo = initializeFirebaseAdmin();

@@ -1,16 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 // firebaseAdmin.ts
-import { Auth, DecodedIdToken } from "firebase-admin/auth";
-import { App } from "firebase-admin/app";
+import { Auth } from "firebase-admin/auth";
 import { serialize } from "cookie";
 import { initializeFirebaseAdmin } from "@/app/lib/firebaseAdmin";
 
 let auth: Auth | undefined;
-
-export const verifyIdToken = async (token: string): Promise<DecodedIdToken> => {
-  const auth = initializeFirebaseAdmin();
-  return auth.verifyIdToken(token);
-};
 
 export async function POST(req: NextRequest) {
   try {

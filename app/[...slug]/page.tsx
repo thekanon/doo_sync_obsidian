@@ -1,7 +1,6 @@
 import React from "react";
 import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
-import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { privatePathList } from "@/app/lib/contants";
 import { getHost } from "@/app/lib/utils";
