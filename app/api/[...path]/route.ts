@@ -6,25 +6,35 @@ import { marked } from "marked";
 import { NextRequest, NextResponse } from "next/server";
 
 // 커스텀 execAsync 함수 정의
-const execAsync = (command: string, options?: { cwd?: string }): Promise<{ stdout: string; stderr: string; exitCode: number | null }> => {
+const execAsync = (
+  command: string,
+  options?: { cwd?: string }
+): Promise<{ stdout: string; stderr: string; exitCode: number | null }> => {
   return new Promise((resolve) => {
-    exec(command, options, (error: ExecException | null, stdout: string | Buffer, stderr: string | Buffer) => {
-      resolve({
-        stdout: stdout.toString(),
-        stderr: stderr.toString(),
-        exitCode: error ? error.code || 1 : 0
-      });
-    });
+    exec(
+      command,
+      options,
+      (
+        error: ExecException | null,
+        stdout: string | Buffer,
+        stderr: string | Buffer
+      ) => {
+        resolve({
+          stdout: stdout.toString(),
+          stderr: stderr.toString(),
+          exitCode: error ? error.code || 1 : 0,
+        });
+      }
+    );
   });
 };
-
 
 marked.setOptions({
   gfm: true, // GitHub Flavored Markdown 활성화
   breaks: true, // 줄바꿈 시 <br> 태그를 추가하도록 설정
 });
 
-const OBSIDIAN_DIR = process.env.REPO_PATH+"/Root" as string;
+const OBSIDIAN_DIR = (process.env.REPO_PATH + "/Root") as string;
 const OBSIDIAN_LINK_REGEX = /\[([^\]]+)\]\(Root/g;
 const OBSIDIAN_INDEX_REGEX = /\[\[([^\|]+)\|([^\]]+)\]\]/g;
 
@@ -69,10 +79,10 @@ function removeTagsSection(content: string): string {
 }
 
 const processContent = async (content: string): Promise<string> => {
-  console.log("🐼st");
+  // console.log("🐼st");
   // console.log(content);
   const convertedIndexLinks = convertObsidianIndexLinks(content);
-  console.log("🐼en");
+  // console.log("🐼en");
   // console.log(convertedIndexLinks);
 
   const convertedContent = convertObsidianLinks(convertedIndexLinks);
@@ -152,13 +162,16 @@ export async function POST(
       );
     }
 
-    const { stdout, stderr, exitCode } = await execAsync("git pull origin main", {
-      cwd: REPO_PATH,
-    });
-    
+    const { stdout, stderr, exitCode } = await execAsync(
+      "git pull origin main",
+      {
+        cwd: REPO_PATH,
+      }
+    );
+
     console.log("Git pull output:", stdout);
     if (stderr) console.log("Git pull :", stderr);
-    
+
     if (exitCode !== 0) {
       console.error(`Git pull failed with exit code ${exitCode}`);
       return NextResponse.json(
