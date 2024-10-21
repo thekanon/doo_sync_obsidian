@@ -1,3 +1,6 @@
+/**
+ * @deprecated 타입 안정성을 위해 이거 대신 타입을 바로 사용할 예정
+ */
 export interface FirebaseUser {
   uid: string;
   email: string;

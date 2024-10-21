@@ -9,7 +9,7 @@ import "firebaseui/dist/firebaseui.css";
 import { useRouter } from "next/navigation";
 import { getUserType } from "@/app/lib/common";
 
-// Firebase 구성 추가러
+// Firebase 구성 추가
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -125,8 +125,7 @@ const LoginPage = () => {
       // 로그인 성공 시 JWT 토큰을 서버에 쿠키로 저장하기 위한 핸들러
       const success = await handleAuthentication(user);
       if (success) {
-        // handleSignOut();
-        // router.push("/");
+        // TODO: 사용자 권한에 따라 페이지 이동
       } else {
         setError("인증에 실패했습니다.");
       }
