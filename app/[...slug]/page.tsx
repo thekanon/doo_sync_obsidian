@@ -62,6 +62,7 @@ async function getObsidianData(params: string[]): Promise<ObsidianData> {
 }
 
 async function getAuthInfo(): Promise<{ user: string } | null> {
+  // TODO: 페이지 별 권한 체크필요
   try {
     const cookieStore = cookies();
     const token = cookieStore.get("token")?.value;
