@@ -4,7 +4,10 @@ import React, { useEffect, useState } from "react";
 import firebase from "firebase/compat/app";
 import * as firebaseui from "firebaseui";
 import "firebase/compat/auth";
-import { handleAuthentication } from "@/app/lib/firebaseAuthentication";
+import {
+  handleAuthentication,
+  handleSignOut as firebaseSignOut,
+} from "@/app/lib/firebaseAuthentication";
 import "firebaseui/dist/firebaseui.css";
 import { useRouter } from "next/navigation";
 import { getUserType } from "@/app/lib/common";
@@ -134,8 +137,19 @@ const LoginPage = () => {
     }
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     if (typeof window !== "undefined") {
+      try {
+        await firebaseSignOut();
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error("로그아웃 오류", error);
+          setError(error.message);
+        } else {
+          console.error("알 수 없는 로그아웃 오류", error);
+          setError("알 수 없는 오류가 발생했습니다.");
+        }
+      }
       firebase
         .auth()
         .signOut()
