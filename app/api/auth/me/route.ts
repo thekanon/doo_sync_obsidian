@@ -2,8 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getAuth } from "firebase-admin/auth";
 import { initializeFirebaseAdmin } from "@/app/lib/firebaseAdmin";
+import { FirebaseError } from "firebase-admin";
 
 export const dynamic = "force-dynamic";
+
+interface FirebaseAuthError extends FirebaseError {
+  code: string;
+  message: string;
+  stack?: string;
+}
+
+function isFirebaseAuthError(error: unknown): error is FirebaseAuthError {
+  return (
+    error !== null &&
+    typeof error === "object" &&
+    "code" in error &&
+    "message" in error
+  );
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -57,20 +73,21 @@ export async function GET(req: NextRequest) {
       };
 
       return NextResponse.json({ user: userInfo }, { status: 200 });
-    } catch (verifyError: any) {
+    } catch (verifyError: unknown) {
       console.error("Token verification failed:", verifyError);
 
-      // Firebase 특정 에러 처리
-      if (verifyError?.code === "auth/id-token-revoked") {
-        return NextResponse.json(
-          { error: "Token has been revoked" },
-          { status: 401 }
-        );
+      if (isFirebaseAuthError(verifyError)) {
+        if (verifyError.code === "auth/id-token-revoked") {
+          return NextResponse.json(
+            { error: "Token has been revoked" },
+            { status: 401 }
+          );
+        }
       }
 
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error in GET handler:", error);
     return NextResponse.json(
       { error: "Internal server error" },
