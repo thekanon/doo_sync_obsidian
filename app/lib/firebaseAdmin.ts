@@ -48,6 +48,10 @@ export const signOut = async (token: string): Promise<void> => {
 };
 
 // 토큰 유효성 검증 함수 (서버 사이드)
+/**
+ *
+ * @deprecated 안쓸 수도 있음.
+ */
 export const verifyToken = async (token: string) => {
   try {
     const auth = getAuth();
