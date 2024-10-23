@@ -51,3 +51,45 @@ export async function handleAuthentication(
     return false;
   }
 }
+
+export const handleSignOut = async () => {
+  if (typeof window !== "undefined") {
+    try {
+      // 현재 로그인된 사용자의 uid 가져오기
+      const currentUser = firebase.auth().currentUser;
+      if (!currentUser?.uid) {
+        throw new Error("No user is currently logged in");
+      }
+
+      // 서버에 토큰 무효화 요청
+      const revokeResponse = await fetch("/api/auth/revoke", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ uid: currentUser.uid }),
+      });
+
+      if (!revokeResponse.ok) {
+        throw new Error("Failed to revoke tokens");
+      }
+
+      // Firebase 로그아웃
+      await firebase.auth().signOut();
+
+      // 클라이언트 측 토큰 제거
+      document.cookie =
+        "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
+
+      console.log("로그아웃 및 토큰 무효화 완료");
+
+      // 선택적: 로그인 페이지로 리디렉션
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("로그아웃 처리 중 오류 발생:", error);
+      throw error;
+    }
+  }
+};

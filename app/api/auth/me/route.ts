@@ -7,10 +7,8 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
-    const authInfo = initializeFirebaseAdmin();
+    initializeFirebaseAdmin();
     const auth = getAuth();
-
-    console.log(authInfo);
 
     if (!auth) {
       console.error("Firebase Auth is not initialized");
@@ -32,12 +30,25 @@ export async function GET(req: NextRequest) {
     }
 
     try {
-      // 토큰 검증
-      const decodedToken = await auth.verifyIdToken(token);
+      // 토큰 검증 (checkRevoked: true 옵션 추가)
+      const decodedToken = await auth.verifyIdToken(token, true);
       const uid = decodedToken.uid;
 
       // 사용자 정보 가져오기
       const userRecord = await auth.getUser(uid);
+
+      // 토큰 발급 시간과 마지막 로그아웃 시간 비교
+      if (userRecord.tokensValidAfterTime) {
+        const tokenIssuedAt = new Date(decodedToken.iat * 1000);
+        const tokensValidAfterTime = new Date(userRecord.tokensValidAfterTime);
+
+        if (tokenIssuedAt < tokensValidAfterTime) {
+          return NextResponse.json(
+            { error: "Token has been revoked" },
+            { status: 401 }
+          );
+        }
+      }
 
       const userInfo = {
         uid: userRecord.uid,
@@ -46,8 +57,17 @@ export async function GET(req: NextRequest) {
       };
 
       return NextResponse.json({ user: userInfo }, { status: 200 });
-    } catch (verifyError) {
+    } catch (verifyError: any) {
       console.error("Token verification failed:", verifyError);
+
+      // Firebase 특정 에러 처리
+      if (verifyError?.code === "auth/id-token-revoked") {
+        return NextResponse.json(
+          { error: "Token has been revoked" },
+          { status: 401 }
+        );
+      }
+
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
   } catch (error) {

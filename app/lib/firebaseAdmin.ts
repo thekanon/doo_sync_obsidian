@@ -46,3 +46,33 @@ export const initializeFirebaseAdmin = (): Auth => {
 export const signOut = async (token: string): Promise<void> => {
   await auth?.revokeRefreshTokens(token);
 };
+
+// 토큰 유효성 검증 함수 (서버 사이드)
+/**
+ *
+ * @deprecated 안쓸 수도 있음.
+ */
+export const verifyToken = async (token: string) => {
+  try {
+    const auth = getAuth();
+    const decodedToken = await auth.verifyIdToken(token, true); // checkRevoked: true
+
+    return {
+      isValid: true,
+      uid: decodedToken.uid,
+    };
+  } catch (error: any) {
+    if (error.code === "auth/id-token-revoked") {
+      // 토큰이 관리자에 의해 무효화됨
+      return {
+        isValid: false,
+        error: "Token has been revoked",
+      };
+    }
+
+    return {
+      isValid: false,
+      error: "Invalid token",
+    };
+  }
+};
