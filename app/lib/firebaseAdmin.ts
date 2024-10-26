@@ -1,8 +1,23 @@
 import { getAuth, Auth } from "firebase-admin/auth";
 import { initializeApp, getApps, cert, App } from "firebase-admin/app";
+import { FirebaseError } from "firebase-admin";
 import serviceAccountKey from "@/serviceAccountKey.json";
 let app: App | undefined;
 let auth: Auth | undefined;
+
+interface FirebaseAuthError extends FirebaseError {
+  code: string;
+  message: string;
+}
+
+function isFirebaseAuthError(error: unknown): error is FirebaseAuthError {
+  return (
+    error !== null &&
+    typeof error === "object" &&
+    "code" in error &&
+    typeof (error as FirebaseAuthError).code === "string"
+  );
+}
 
 export const initializeFirebaseAdmin = (): Auth => {
   if (getApps().length === 0) {
@@ -61,13 +76,14 @@ export const verifyToken = async (token: string) => {
       isValid: true,
       uid: decodedToken.uid,
     };
-  } catch (error: any) {
-    if (error.code === "auth/id-token-revoked") {
-      // 토큰이 관리자에 의해 무효화됨
-      return {
-        isValid: false,
-        error: "Token has been revoked",
-      };
+  } catch (error: unknown) {
+    if (isFirebaseAuthError(error)) {
+      if (error.code === "auth/id-token-revoked") {
+        return {
+          isValid: false,
+          error: "Token has been revoked",
+        };
+      }
     }
 
     return {
