@@ -67,14 +67,12 @@ export async function GET(req: NextRequest) {
       }
 
       const userInfo = {
-        uid: userRecord.uid,
-        email: userRecord.email,
-        displayName: userRecord.displayName,
+        ...userRecord,
       };
 
       return NextResponse.json({ user: userInfo }, { status: 200 });
     } catch (verifyError: unknown) {
-      console.error("Token verification failed:", verifyError);
+      console.error("Token verification failed me:", verifyError);
 
       if (isFirebaseAuthError(verifyError)) {
         if (verifyError.code === "auth/id-token-revoked") {

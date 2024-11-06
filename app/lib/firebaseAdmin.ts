@@ -1,7 +1,6 @@
 import { getAuth, Auth } from "firebase-admin/auth";
 import { initializeApp, getApps, cert, App } from "firebase-admin/app";
 import { FirebaseError } from "firebase-admin";
-import serviceAccountKey from "@/serviceAccountKey.json";
 let app: App | undefined;
 let auth: Auth | undefined;
 
@@ -9,6 +8,20 @@ interface FirebaseAuthError extends FirebaseError {
   code: string;
   message: string;
 }
+
+const serviceAccountKey = {
+  type: "service_account",
+  project_id: process.env.FIREBASE_PROJECT_ID,
+  private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+  private_key: process.env.FIREBASE_PRIVATE_KEY,
+  client_email: process.env.FIREBASE_CLIENT_EMAIL,
+  client_id: process.env.FIREBASE_CLIENT_ID,
+  auth_uri: "https://accounts.google.com/o/oauth2/auth",
+  token_uri: "https://oauth2.googleapis.com/token",
+  auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+  client_x509_cert_url: process.env.GOOGLE_CLOUD_CLIENT_X509_CERT_URL,
+  universe_domain: "googleapis.com",
+};
 
 function isFirebaseAuthError(error: unknown): error is FirebaseAuthError {
   return (
