@@ -4,6 +4,7 @@ import { JSDOM } from "jsdom";
 import { cookies } from "next/headers";
 import { privatePathList } from "@/app/lib/contants";
 import { getHost } from "@/app/lib/utils";
+import { fetchAuthInfo } from "@/services/auth/authService";
 
 type Params = {
   slug: string[];
@@ -60,34 +61,18 @@ async function getObsidianData(params: string[]): Promise<ObsidianData> {
   return fetchObsidianData(path);
 }
 
-async function getAuthInfo(): Promise<{ user: string } | null> {
+async function getAuthInfo(): Promise<boolean> {
   // TODO: 페이지 별 권한 체크필요
   try {
     const cookieStore = cookies();
     const token = cookieStore.get("token")?.value;
-    const response = await fetch("http://localhost:33000/api/auth/me", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      credentials: "include", // 쿠키 포함
-    });
+    const user = await fetchAuthInfo(token);
 
-    if (!response.ok) {
-      if (response.status === 401) {
-        return null; // 인증되지 않은 사용자
-      }
-      throw new Error("Failed to fetch authentication info");
+    if (!user) {
+      return false;
     }
 
-    const authInfo = await response.json();
-
-    if (!authInfo?.user) {
-      return null;
-    }
-
-    return authInfo;
+    return true;
   } catch (error) {
     console.error("Error fetching auth info:", error);
     throw error;
@@ -97,16 +82,16 @@ async function getAuthInfo(): Promise<{ user: string } | null> {
 // Home 컴포넌트
 export default async function Home({ params }: { params: Params }) {
   try {
-    const authInfo = await getAuthInfo();
+    // const authInfo = await getAuthInfo();
 
-    if (!authInfo) {
-      return (
-        <div className="prose prose-lg p-3">
-          <h1>인증 필요</h1>
-          <p>이 페이지를 보려면 로그인이 필요합니다.</p>
-        </div>
-      );
-    }
+    // if (!authInfo) {
+    //   return (
+    //     <div className="prose prose-lg p-3">
+    //       <h1>인증 필요</h1>
+    //       <p>이 페이지를 보려면 로그인이 필요합니다.</p>
+    //     </div>
+    //   );
+    // }
 
     const data = await getObsidianData(params.slug);
 
