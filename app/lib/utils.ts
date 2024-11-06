@@ -1,4 +1,8 @@
-import { pagePermissions } from "../types/page";
+/**
+ * @fileoverview 유틸리티 함수들을 정의한 파일
+ * 서버사이드에서 사용되는 함수들을 정의
+ */
+import { pagePermissions } from "../types/pagePermissions";
 import { NextRequest, NextResponse } from "next/server";
 import { User, UserRole } from "../types/user";
 import { fetchAuthInfo } from "@/services/auth/authService";

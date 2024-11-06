@@ -1,3 +1,6 @@
+/**
+ * 페이지 권한 정보
+ */
 import { UserRole } from "./user";
 
 interface PagePermission {

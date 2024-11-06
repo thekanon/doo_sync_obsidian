@@ -1,3 +1,4 @@
+// TODO: LocalStorage 또는 Cookie를 사용하여 방문 횟수 관리 테스트 및 구현 필요
 // LocalStorage 또는 Cookie를 사용하여 방문 횟수 관리
 class VisitTracker {
   static async getVisitCount(): Promise<number> {

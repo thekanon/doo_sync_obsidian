@@ -1,10 +1,8 @@
 import React from "react";
 import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
-import { cookies } from "next/headers";
 import { privatePathList } from "@/app/lib/contants";
 import { getHost } from "@/app/lib/utils";
-import { fetchAuthInfo } from "@/services/auth/authService";
 
 type Params = {
   slug: string[];
@@ -61,29 +59,11 @@ async function getObsidianData(params: string[]): Promise<ObsidianData> {
   return fetchObsidianData(path);
 }
 
-async function getAuthInfo(): Promise<boolean> {
-  // TODO: 페이지 별 권한 체크필요
-  try {
-    const cookieStore = cookies();
-    const token = cookieStore.get("token")?.value;
-    const user = await fetchAuthInfo(token);
-
-    if (!user) {
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    console.error("Error fetching auth info:", error);
-    throw error;
-  }
-}
-
 // Home 컴포넌트
 export default async function Home({ params }: { params: Params }) {
   try {
+    // TODO: 페이지 별 권한 체크하므로 필요없어서 삭제해야함
     // const authInfo = await getAuthInfo();
-
     // if (!authInfo) {
     //   return (
     //     <div className="prose prose-lg p-3">
