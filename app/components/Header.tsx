@@ -9,80 +9,74 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ user }) => {
-  const userRole = user?.role || UserRole.ANONYMOUS;
+  const userRole = user?.role ?? UserRole.ANONYMOUS; // null 병합 연산자 사용
   const userRoleText = AUTH_STATUS_MESSAGES[userRole];
-  const isLoggedIn = userRole;
-  console.log("user:::", user);
+  const isLoggedIn = userRole !== UserRole.ANONYMOUS; // 명확한 로그인 상태 체크
 
-  const getRoleBadgeColor = (role: UserRole) => {
-    switch (role) {
-      case UserRole.ADMIN:
-        return "bg-red-100 text-red-800";
-      case UserRole.VERIFIED:
-        return "bg-blue-100 text-blue-800";
-      case UserRole.GUEST:
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+  // 상수로 분리하여 재사용성 향상
+  const ROLE_STYLES = {
+    [UserRole.ADMIN]: "bg-red-100 text-red-800",
+    [UserRole.VERIFIED]: "bg-blue-100 text-blue-800",
+    [UserRole.GUEST]: "bg-green-100 text-green-800",
+    [UserRole.ANONYMOUS]: "bg-gray-100 text-gray-800",
+  } as const;
+
+  // 이미지 공통 속성 추출
+  const IconImage = ({ src, alt = "Icon" }: { src: string; alt?: string }) => (
+    <Image src={src} width={24} height={24} alt={alt} />
+  );
 
   return (
-    <header className="flex items-center justify-between bg-white p-2 shadow-md">
-      <Link className="flex items-center" href="/">
-        <Image src="/logo.svg" width={24} height={24} alt="Icon" />
-        <span className="ml-2">Doo Wiki</span>
+    <header className="sticky top-0 z-50 flex items-center justify-between bg-white px-4 py-2 shadow-md">
+      <Link
+        className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+        href="/"
+        aria-label="Home"
+      >
+        <IconImage src="/logo.svg" />
+        <span className="text-lg font-medium">Doo Wiki</span>
       </Link>
 
-      <div className="flex items-center gap-2">
-        <button className="rounded p-1">
-          <Image
-            src="/Iconly/Light/Search.svg"
-            width={24}
-            height={24}
-            alt="Icon"
-          />
+      <div className="flex items-center gap-3">
+        <button
+          className="rounded p-1.5 hover:bg-gray-100 transition-colors"
+          aria-label="Search"
+        >
+          <IconImage src="/Iconly/Light/Search.svg" />
         </button>
 
-        {isLoggedIn && (
+        {isLoggedIn ? (
           <>
-            <button className="rounded p-1">
-              <Image
-                src="/Iconly/Light/Notification.svg"
-                width={24}
-                height={24}
-                alt="Icon"
-              />
+            <button
+              className="rounded p-1.5 hover:bg-gray-100 transition-colors"
+              aria-label="Notifications"
+            >
+              <IconImage src="/Iconly/Light/Notification.svg" />
             </button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <span
-                className={`text-xs px-2 py-1 rounded-full font-medium ${getRoleBadgeColor(
-                  userRole
-                )}`}
+                className={`text-xs px-3 py-1.5 rounded-full font-medium ${ROLE_STYLES[userRole]}`}
+                title={`User Role: ${userRoleText}`}
               >
                 {userRoleText}
               </span>
-              <Link href="/login" className="rounded p-1">
-                <Image
-                  src="/Iconly/Light/Logout.svg"
-                  width={24}
-                  height={24}
-                  alt="Logout"
-                />
+              <Link
+                href="/login"
+                className="rounded p-1.5 hover:bg-gray-100 transition-colors"
+                aria-label="Logout"
+              >
+                <IconImage src="/Iconly/Light/Logout.svg" alt="Logout" />
               </Link>
             </div>
           </>
-        )}
-
-        {!isLoggedIn && (
-          <Link href="/login" className="rounded p-1">
-            <Image
-              src="/Iconly/Light/Login.svg"
-              width={24}
-              height={24}
-              alt="Login"
-            />
+        ) : (
+          <Link
+            href="/login"
+            className="rounded p-1.5 hover:bg-gray-100 transition-colors"
+            aria-label="Login"
+          >
+            <IconImage src="/Iconly/Light/Login.svg" alt="Login" />
           </Link>
         )}
       </div>
