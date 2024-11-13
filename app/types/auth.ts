@@ -30,3 +30,22 @@ interface StsTokenManager {
   accessToken: string;
   expirationTime: number;
 }
+
+// 사용자 타입을 상수로 정의
+const USER_TYPES = {
+  ADMIN: "ADMIN",
+  VERIFIED: "VERIFIED",
+  GUEST: "GUEST",
+  ANONYMOUS: "ANONYMOUS",
+} as const;
+
+// 사용자 타입에 따른 상태 메시지 매핑
+export const AUTH_STATUS_MESSAGES = {
+  [USER_TYPES.ADMIN]: "관리자",
+  [USER_TYPES.VERIFIED]: "이메일 인증 사용자",
+  [USER_TYPES.GUEST]: "게스트 사용자",
+  [USER_TYPES.ANONYMOUS]: "익명 사용자",
+} as const;
+
+// 사용자 타입을 TypeScript 타입으로 정의
+export type UserType = keyof typeof AUTH_STATUS_MESSAGES;
