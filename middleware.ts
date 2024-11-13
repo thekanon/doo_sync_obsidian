@@ -3,8 +3,6 @@ import type { NextRequest } from "next/server";
 import { UserRole } from "@/app/types/user";
 import {
   getCurrentUser,
-  getVisitCount,
-  incrementVisitCount,
   isPublicPage,
   hasPermission,
   resetVisitCount,
@@ -31,6 +29,16 @@ export async function middleware(request: NextRequest) {
 
   const user = await getCurrentUser(request);
 
+  // user 정보를 헤더에 추가
+  if (user) {
+    const userInfo = {
+      id: user.uid,
+      role: user.role,
+    };
+    console.log("😈 userInfo", userInfo);
+    requestHeaders.set("x-user-info", JSON.stringify(userInfo));
+  }
+
   // 비로그인 사용자 방문 횟수 체크
   if (!user) {
     if (isPublicPage(path)) {
@@ -50,15 +58,6 @@ export async function middleware(request: NextRequest) {
   }
   console.log("👮‍♂️ permission check");
 
-  // user 정보를 헤더에 추가
-  if (user) {
-    const userInfo = {
-      id: user.uid,
-      role: user.role,
-    };
-    requestHeaders.set("x-user-info", JSON.stringify(userInfo));
-  }
-
   // 새로운 response 객체 생성
   const finalResponse = NextResponse.next({
     request: {
@@ -67,7 +66,7 @@ export async function middleware(request: NextRequest) {
   });
   console.log("🚀 middleware");
   // 방문 횟수 초기화
-  const resetResponse = await resetVisitCount();
+  const resetResponse = await resetVisitCount(requestHeaders);
   if (resetResponse) return resetResponse;
   return finalResponse;
 }

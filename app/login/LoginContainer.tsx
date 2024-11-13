@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import firebase from "firebase/compat/app";
 import * as firebaseui from "firebaseui";
 import "firebase/compat/auth";
@@ -32,6 +32,19 @@ const LoginPage = () => {
   const [userType, setUserType] = useState<string>("게스트");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const userIcon = useMemo(() => {
+    switch (userType) {
+      case "관리자":
+        return "👑";
+      case "이메일 인증 사용자":
+        return "✉️";
+      case "게스트 사용자":
+        return "👤";
+      default:
+        return "🔒";
+    }
+  }, [userType]);
 
   const router = useRouter();
 
@@ -211,7 +224,7 @@ const LoginPage = () => {
             <p className="flex items-center">
               <span className="font-semibold mr-2 min-w-[24px]">👤</span>
               <span>
-                <strong className="block sm:inline">게스트:</strong>
+                <strong className="block sm:inline">게스트 사용자:</strong>
                 <span className="block sm:inline sm:ml-2">
                   일부 페이지에 접근 가능
                 </span>
@@ -223,7 +236,7 @@ const LoginPage = () => {
             <p className="flex items-center">
               <span className="font-semibold mr-2 min-w-[24px]">🔒</span>
               <span>
-                <strong className="block sm:inline">로그인 미완료:</strong>
+                <strong className="block sm:inline">익명 사용자:</strong>
                 <span className="block sm:inline sm:ml-2">
                   10개 이상의 페이지 접근 시 로그인 필요
                 </span>
@@ -258,7 +271,7 @@ const LoginPage = () => {
         {!loading && user && (
           <div className="space-y-3 sm:space-y-4">
             <div className="flex items-center justify-center space-x-2 text-base sm:text-lg font-medium text-gray-700 p-3 bg-gray-50 rounded-lg">
-              <span className="text-xl sm:text-2xl">👤</span>
+              <span className="text-xl sm:text-2xl">{userIcon}</span>
               <span>현재 권한: {userType}</span>
             </div>
             <div className="grid gap-3 sm:gap-4">

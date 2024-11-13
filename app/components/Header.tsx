@@ -9,9 +9,10 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ user }) => {
-  const userRole = user?.role || UserRole.GUEST;
+  const userRole = user?.role || UserRole.ANONYMOUS;
   const userRoleText = AUTH_STATUS_MESSAGES[userRole];
   const isLoggedIn = userRole;
+  console.log("user:::", user);
 
   const getRoleBadgeColor = (role: UserRole) => {
     switch (role) {
@@ -19,7 +20,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
         return "bg-red-100 text-red-800";
       case UserRole.VERIFIED:
         return "bg-blue-100 text-blue-800";
-      case UserRole.ANONYMOUS:
+      case UserRole.GUEST:
         return "bg-green-100 text-green-800";
       default:
         return "bg-gray-100 text-gray-800";

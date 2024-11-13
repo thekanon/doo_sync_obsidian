@@ -95,6 +95,7 @@ export async function getServerUser(): Promise<User | null> {
   try {
     const headersList = headers();
     const user = headersList.get("x-user-info");
+    console.log("🔒 user", user);
     if (!user) return null;
     return JSON.parse(user) as User;
   } catch (error) {
@@ -160,8 +161,14 @@ export const handleVisitCount = async (
 /**
  * 방문 횟수 초기화
  */
-export const resetVisitCount = async (): Promise<NextResponse> => {
-  const response = NextResponse.next();
+export const resetVisitCount = async (
+  headers: Headers
+): Promise<NextResponse> => {
+  const response = NextResponse.next({
+    request: {
+      headers: headers,
+    },
+  });
 
   // 쿠키 삭제 시 옵션 명시적으로 설정
   response.cookies.set(VISIT_COUNT_COOKIE, "0", {

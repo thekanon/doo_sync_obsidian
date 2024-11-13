@@ -4,7 +4,7 @@ export enum UserRole {
   ADMIN = "ADMIN", // 관리자
   VERIFIED = "VERIFIED", // 이메일 인증 사용자
   GUEST = "GUEST", // 비인증 사용자
-  ANONYMOUS = "ANONYMOUS", // 비로그인 사용자, 실제로는 User가 없으므로 사용 안함
+  ANONYMOUS = "ANONYMOUS", // 비로그인 사용자
 }
 
 export interface User extends FirebaseUser {

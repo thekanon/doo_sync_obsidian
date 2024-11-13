@@ -43,7 +43,7 @@ const USER_TYPES = {
 export const AUTH_STATUS_MESSAGES = {
   [USER_TYPES.ADMIN]: "관리자",
   [USER_TYPES.VERIFIED]: "이메일 인증 사용자",
-  [USER_TYPES.GUEST]: "로그인 필요",
+  [USER_TYPES.GUEST]: "게스트 사용자",
   [USER_TYPES.ANONYMOUS]: "익명 사용자",
 } as const;
 

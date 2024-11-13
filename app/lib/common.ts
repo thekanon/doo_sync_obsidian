@@ -21,11 +21,11 @@ export function getUserType(
   }
 
   if (user.isAnonymous) {
-    return "ANONYMOUS";
+    return "GUEST";
   }
 
-  // 기본값은 guestUser(비로그인 사용자)
-  return "GUEST";
+  // 기본값은 ANONYMOUS(비로그인 사용자)
+  return "ANONYMOUS";
 }
 
 /**
