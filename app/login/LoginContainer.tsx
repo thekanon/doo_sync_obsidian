@@ -10,7 +10,7 @@ import {
 } from "@/app/lib/firebaseAuthentication";
 import "firebaseui/dist/firebaseui.css";
 import { useRouter } from "next/navigation";
-import { getUserType } from "@/app/lib/common";
+import { getAuthStatus } from "@/app/lib/common";
 
 // Firebase 구성 추가
 const firebaseConfig = {
@@ -163,87 +163,124 @@ const LoginPage = () => {
     }
   };
 
-  const getAuthStatus = async (user: firebase.User) => {
-    const userType = getUserType(user);
-    switch (userType) {
-      case "admin":
-        setUserType("관리자");
-        break;
-      case "emailUser":
-        setUserType("이메일 인증 사용자");
-        break;
-      case "anonymousUser":
-        setUserType("익명 사용자");
-        break;
-      case "guestUser":
-        setUserType("게스트");
-        break;
-    }
+  const getAuthText = async (user: firebase.User) => {
+    const authStatus = await getAuthStatus(user);
+    setUserType(authStatus);
   };
 
   useEffect(() => {
     if (user) {
-      getAuthStatus(user);
+      getAuthText(user);
     }
   }, [user]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-100 to-purple-100 p-4">
-      <div className="bg-white rounded-lg shadow-xl p-8 max-w-2xl w-full">
-        <h1 className="text-4xl font-bold mb-6 text-center text-gray-800">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-100 to-purple-100 p-4 sm:p-6">
+      <div className="bg-white rounded-lg shadow-xl p-4 sm:p-8 w-full max-w-[95%] sm:max-w-2xl">
+        <h1 className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6 text-center text-gray-800">
           사용자 권한 안내
         </h1>
-        <div className="mb-6 text-lg text-gray-600 space-y-2">
-          <p className="flex items-center">
-            <span className="font-semibold mr-2">👑 관리자:</span> 모든 페이지에
-            접근 가능
-          </p>
-          <p className="flex items-center">
-            <span className="font-semibold mr-2">✉️ 이메일 인증 사용자:</span>{" "}
-            일부 페이지에 접근 가능
-          </p>
-          <p className="flex items-center">
-            <span className="font-semibold mr-2">👤 게스트:</span> 일부 페이지에
-            접근 가능
-          </p>
-          <p className="flex items-center">
-            <span className="font-semibold mr-2">🔒 로그인 미완료:</span> 일부
-            페이지에 접근 가능, 5개 이상 접근 시 로그인 필요
-          </p>
+
+        {/* 권한 안내 섹션 */}
+        <div className="mb-4 sm:mb-6 text-base sm:text-lg text-gray-600 space-y-3">
+          <div className="p-3 bg-white rounded-lg shadow-sm border border-gray-100">
+            <p className="flex items-center">
+              <span className="font-semibold mr-2 min-w-[24px]">👑</span>
+              <span>
+                <strong className="block sm:inline">관리자:</strong>
+                <span className="block sm:inline sm:ml-2">
+                  모든 페이지에 접근 가능
+                </span>
+              </span>
+            </p>
+          </div>
+
+          <div className="p-3 bg-white rounded-lg shadow-sm border border-gray-100">
+            <p className="flex items-center">
+              <span className="font-semibold mr-2 min-w-[24px]">✉️</span>
+              <span>
+                <strong className="block sm:inline">이메일 인증 사용자:</strong>
+                <span className="block sm:inline sm:ml-2">
+                  일부 페이지에 접근 가능
+                </span>
+              </span>
+            </p>
+          </div>
+
+          <div className="p-3 bg-white rounded-lg shadow-sm border border-gray-100">
+            <p className="flex items-center">
+              <span className="font-semibold mr-2 min-w-[24px]">👤</span>
+              <span>
+                <strong className="block sm:inline">게스트:</strong>
+                <span className="block sm:inline sm:ml-2">
+                  일부 페이지에 접근 가능
+                </span>
+              </span>
+            </p>
+          </div>
+
+          <div className="p-3 bg-white rounded-lg shadow-sm border border-gray-100">
+            <p className="flex items-center">
+              <span className="font-semibold mr-2 min-w-[24px]">🔒</span>
+              <span>
+                <strong className="block sm:inline">로그인 미완료:</strong>
+                <span className="block sm:inline sm:ml-2">
+                  10개 이상의 페이지 접근 시 로그인 필요
+                </span>
+              </span>
+            </p>
+          </div>
         </div>
 
+        {/* FirebaseUI 컨테이너 */}
         <div
           id="firebaseui-auth-container"
           className={`mb-4 ${loading || user ? "hidden" : ""}`}
-        ></div>
-
-        {loading ? (
-          <div className="flex justify-center items-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-          </div>
-        ) : user ? (
-          <div className="space-y-4">
-            <div className="flex items-center justify-center space-x-2 text-lg font-medium text-gray-700">
-              <span className="text-2xl">👤</span>
-              <span>현재 권한: {userType}</span>
-            </div>
-            <button
-              onClick={handleSignOut}
-              className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300 flex items-center justify-center"
-            >
-              로그아웃
-            </button>
+        >
+          <div className="flex items-center justify-center mt-4">
             <button
               onClick={() => router.push("/")}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 flex items-center justify-center"
+              className="w-full sm:w-auto px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition duration-300 flex items-center justify-center text-base sm:text-lg"
             >
               홈으로 이동
             </button>
           </div>
-        ) : null}
+        </div>
 
+        {/* 로딩 상태 */}
+        {loading && (
+          <div className="flex justify-center items-center py-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          </div>
+        )}
+
+        {/* 로그인된 사용자 정보 */}
+        {!loading && user && (
+          <div className="space-y-3 sm:space-y-4">
+            <div className="flex items-center justify-center space-x-2 text-base sm:text-lg font-medium text-gray-700 p-3 bg-gray-50 rounded-lg">
+              <span className="text-xl sm:text-2xl">👤</span>
+              <span>현재 권한: {userType}</span>
+            </div>
+            <div className="grid gap-3 sm:gap-4">
+              <button
+                onClick={handleSignOut}
+                className="w-full px-4 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg transition duration-300 flex items-center justify-center text-base sm:text-lg"
+              >
+                로그아웃
+              </button>
+              <button
+                onClick={() => router.push("/")}
+                className="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition duration-300 flex items-center justify-center text-base sm:text-lg"
+              >
+                홈으로 이동
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* 에러 메시지 */}
         {error && (
-          <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded flex items-center">
+          <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-center text-sm sm:text-base">
             <span className="text-xl mr-2">⚠️</span>
             <span>오류: {error}</span>
           </div>

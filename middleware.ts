@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { cookies } from "next/headers";
 import { UserRole } from "@/app/types/user";
 import {
   getCurrentUser,
@@ -8,7 +7,10 @@ import {
   incrementVisitCount,
   isPublicPage,
   hasPermission,
+  resetVisitCount,
+  handleVisitCount,
 } from "@/app/lib/utils";
+import { isPublicPageList } from "@/app/types/pagePermissions";
 
 export async function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
@@ -22,8 +24,6 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  // console.log("😈 path", path);
-
   // 공개 리소스는 체크하지 않음
   if (path.match(/\.(ico|png|jpg|jpeg|css|js|svg)$/)) {
     return response;
@@ -33,12 +33,12 @@ export async function middleware(request: NextRequest) {
 
   // 비로그인 사용자 방문 횟수 체크
   if (!user) {
-    const visitCount = await getVisitCount(request);
-    if (visitCount > 5 && !isPublicPage(path)) {
-      return NextResponse.redirect(new URL("/login", request.url));
+    if (isPublicPage(path)) {
+      return response;
     }
-    incrementVisitCount(response);
-    console.log("visitCount", visitCount);
+
+    const visitResponse = await handleVisitCount(request);
+    if (visitResponse) return visitResponse;
   } else {
     console.log("user.role", user.role);
   }
@@ -49,7 +49,27 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
   console.log("👮‍♂️ permission check");
-  return response;
+
+  // user 정보를 헤더에 추가
+  if (user) {
+    const userInfo = {
+      id: user.uid,
+      role: user.role,
+    };
+    requestHeaders.set("x-user-info", JSON.stringify(userInfo));
+  }
+
+  // 새로운 response 객체 생성
+  const finalResponse = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+  console.log("🚀 middleware");
+  // 방문 횟수 초기화
+  const resetResponse = await resetVisitCount();
+  if (resetResponse) return resetResponse;
+  return finalResponse;
 }
 
 export const config = {

@@ -1,19 +1,14 @@
 module.exports = {
   apps: [
     {
-      name: "doo_sync_obsidian",
+      name: "my-app",
       script: "npm",
       args: "start",
-      env: {
-        NODE_ENV: "production",
-      },
-      instances: 2,
-      autorestart: true,
+      instances: "max",
       exec_mode: "cluster",
-      output: "./logs/out.log",
-      error: "./logs/error.log",
-      log_date_format: "YYYY-MM-DD HH:mm:ss Z",
-      merge_logs: true,
+      out_file: "~/.pm2/logs/my-app-out.log", // stdout 로그 경로
+      error_file: "~/.pm2/logs/my-app-error.log", // stderr 로그 경로
+      log_date_format: "YYYY-MM-DD HH:mm:ss",
     },
   ],
 };

@@ -19,5 +19,6 @@ export async function fetchAuthInfo(token?: string): Promise<User> {
   }
 
   const data = await response.json();
+  console.log("data", data);
   return data.user as User;
 }

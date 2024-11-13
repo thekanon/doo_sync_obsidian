@@ -10,6 +10,27 @@ interface PagePermission {
 }
 
 export const pagePermissions: PagePermission[] = [
+  // 모든 사용자 접근 가능
+  {
+    path: "/",
+    allowedRoles: [],
+    isPublic: true,
+  },
+  {
+    path: "/login*",
+    allowedRoles: [],
+    isPublic: true,
+  },
+  {
+    path: "/_Index_of_Root*",
+    allowedRoles: [],
+    isPublic: true,
+  },
+  {
+    path: "/unauthorized",
+    allowedRoles: [],
+    isPublic: true,
+  },
   // 어드민 권한만 접근 가능
   {
     path: "/1. 일지/*",
@@ -18,6 +39,16 @@ export const pagePermissions: PagePermission[] = [
   },
   {
     path: "/3. 회사/*",
+    allowedRoles: [UserRole.ADMIN],
+    isPublic: false,
+  },
+  {
+    path: "/*/_Index_of_커리어*",
+    allowedRoles: [UserRole.ADMIN],
+    isPublic: false,
+  },
+  {
+    path: "/*/_Index_of_99.일기*",
     allowedRoles: [UserRole.ADMIN],
     isPublic: false,
   },
@@ -33,11 +64,6 @@ export const pagePermissions: PagePermission[] = [
   },
 
   // 어드민, 인증된 사용자만 접근 가능
-  {
-    path: "/5. 프로젝트/*",
-    allowedRoles: [UserRole.ADMIN, UserRole.VERIFIED],
-    isPublic: false,
-  },
   {
     path: "/8. 루틴/*",
     allowedRoles: [UserRole.ADMIN, UserRole.VERIFIED],
@@ -55,4 +81,11 @@ export const pagePermissions: PagePermission[] = [
     allowedRoles: [UserRole.ADMIN, UserRole.VERIFIED, UserRole.GUEST],
     isPublic: false,
   },
+];
+
+export const isPublicPageList = [
+  "/",
+  "/login*",
+  "/_Index_of_Root*",
+  "/unauthorized",
 ];
