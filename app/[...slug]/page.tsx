@@ -1,24 +1,26 @@
 import React from "react";
 import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
-import { parse } from "node-html-parser";
+import {
+  parse,
+  HTMLElement,
+  Node as HTMLNode,
+  TextNode,
+} from "node-html-parser";
 import FileLink from "@/app/components/FileLink";
 import { getHost, getServerUser, hasPermission } from "@/app/lib/utils";
 import { UserRole } from "../types/user";
 
 type Params = {
-  slug: string[]; // URL 경로를 나타내는 문자열 배열
+  slug: string[];
 };
 
 type ObsidianData = {
-  content: string; // Obsidian에서 가져온 콘텐츠
-  createdAt?: string; // 생성일
-  updatedAt?: string; // 수정일
+  content: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
-/**
- * HTML 문자열을 파싱하여 React 컴포넌트로 변환
- */
 function parseHtmlToReact(
   html: string,
   path: string,
@@ -39,49 +41,47 @@ function parseHtmlToReact(
 
   const voidElements = new Set(["br", "img", "hr", "input", "link", "meta"]);
 
-  // BR 태그 제거 로직
   if (isIndexPage) {
     const brNodes = root.querySelectorAll("br");
     brNodes.forEach((brNode) => {
       const prevSibling = brNode.previousElementSibling;
       const nextSibling = brNode.nextElementSibling;
-      if (prevSibling?.tagName === "A" && nextSibling?.tagName === "A") {
+      if (
+        prevSibling instanceof HTMLElement &&
+        nextSibling instanceof HTMLElement &&
+        prevSibling.tagName === "A" &&
+        nextSibling.tagName === "A"
+      ) {
         brNode.remove();
       }
     });
   }
 
-  const convertToReact = (node: any): React.ReactNode => {
-    // nodeType: 3 - Text, 1 - Element
-    if (node.nodeType === 3) return node.text;
-    if (node.nodeType === 1) {
-      const props = node.attributes
-        ? Object.keys(node.attributes).reduce((acc: any, key: string) => {
-            if (node.attributes[key]) {
-              acc[key] = node.attributes[key];
-            }
-            return acc;
-          }, {})
-        : {};
+  const convertToReact = (node: HTMLNode): React.ReactNode => {
+    if (node instanceof TextNode) {
+      return node.text;
+    }
 
-      if (node.tagName?.toLowerCase() === "a") {
+    if (node instanceof HTMLElement) {
+      const props = node.attributes;
+
+      if (node.tagName.toLowerCase() === "a") {
         if (!isIndexPage) {
-          // isIndexPage가 아닌 경우 일반 a 태그로 처리
           return React.createElement(
             "a",
-            { key: Math.random(), ...props },
+            { key: node.rawText, ...props },
             node.childNodes.map(convertToReact)
           );
         } else {
-          let text = node.childNodes.map(convertToReact);
-          if (text[0]?.startsWith("_Index_of_")) {
-            const directoryText = text[0].replace(/_Index_of_/g, "");
-            const isLocked = !hasPermission(role, node.attributes.href);
+          const text = node.childNodes.map(convertToReact).join("");
+          if (text.startsWith("_Index_of_")) {
+            const directoryText = text.replace(/_Index_of_/g, "");
+            const isLocked = !hasPermission(role, props.href);
 
             return (
               <FileLink
-                key={Math.random()}
-                href={node.attributes.href}
+                key={node.rawText}
+                href={props.href}
                 text={directoryText}
                 isDirectory
                 isLocked={isLocked}
@@ -91,8 +91,8 @@ function parseHtmlToReact(
           } else {
             return (
               <FileLink
-                key={Math.random()}
-                href={node.attributes.href}
+                key={node.rawText}
+                href={props.href}
                 text={text}
                 createdAt={createdAt}
               />
@@ -101,39 +101,22 @@ function parseHtmlToReact(
         }
       }
 
-      if (isIndexPage && node.tagName?.toLowerCase() === "p") {
-        // <p> 하위 요소를 재귀적으로 처리
-        const childNodes = node.childNodes.map((childNode: any) =>
-          convertToReact(childNode)
-        );
+      if (isIndexPage && node.tagName.toLowerCase() === "p") {
+        const childNodes = node.childNodes.map(convertToReact);
 
-        // 하위 요소 중에서 링크만 추출
         const links = childNodes.filter(
           (
-            child: any
+            child
           ): child is React.ReactElement<{
             href: string;
             isDirectory?: boolean;
-          }> =>
-            React.isValidElement(child) &&
-            !!(child as React.ReactElement).props.href // 링크인지 확인
+          }> => React.isValidElement(child) && !!child.props.href
         );
 
-        // 디렉토리와 파일로 분리
-        const directories = links.filter(
-          (
-            link: React.ReactElement<
-              any,
-              string | React.JSXElementConstructor<any>
-            >
-          ) => (link as React.ReactElement).props.isDirectory
-        );
-        const files = links.filter(
-          (link: { props: { isDirectory: any } }) => !link.props.isDirectory
-        );
+        const directories = links.filter((link) => link.props.isDirectory);
+        const files = links.filter((link) => !link.props.isDirectory);
 
-        // 디렉토리 먼저 정렬된 링크 요소를 포함하는 새로운 <p> 태그 생성
-        return React.createElement("p", { key: Math.random() }, [
+        return React.createElement("p", { key: node.rawText }, [
           ...directories,
           ...files,
         ]);
@@ -141,20 +124,20 @@ function parseHtmlToReact(
 
       const Component = node.tagName.toLowerCase();
       if (voidElements.has(Component)) {
-        return React.createElement(Component, { key: Math.random(), ...props });
+        return React.createElement(Component, { key: node.rawText, ...props });
       }
 
       return React.createElement(
         Component,
-        { key: Math.random(), ...props },
+        { key: node.rawText, ...props },
         node.childNodes.map(convertToReact)
       );
     }
+
     return null;
   };
 
   const elements = root.childNodes.map(convertToReact);
-
   return elements;
 }
 
@@ -173,20 +156,15 @@ function CustomContent({
 }) {
   const parsedContent = React.useMemo(
     () => parseHtmlToReact(content, path, role, updatedAt, createdAt),
-    [content]
+    [content, path, role, updatedAt, createdAt]
   );
 
   return <div>{parsedContent}</div>;
 }
 
-/**
- * Obsidian 데이터를 가져오는 함수
- * @param path - API 요청 경로
- * @returns Promise<ObsidianData>
- */
 async function fetchObsidianData(path: string): Promise<ObsidianData> {
   const res = await fetch(`${getHost()}/api/${path}`, {
-    next: { revalidate: 60 }, // 60초마다 데이터 재검증
+    next: { revalidate: 60 },
   });
 
   if (!res.ok) {
@@ -196,10 +174,6 @@ async function fetchObsidianData(path: string): Promise<ObsidianData> {
   return await res.json();
 }
 
-/**
- * 메인 홈 컴포넌트
- * Obsidian 콘텐츠를 가져와서 안전하게 렌더링
- */
 export default async function Page({ params }: { params: Params }) {
   try {
     const path = params.slug.join("/");
@@ -210,11 +184,7 @@ export default async function Page({ params }: { params: Params }) {
 
     return (
       <div>
-        <div
-          className="prose prose-lg p-3
-          flex flex-col items-center flex-grow flex-shrink-0 w-full max-w-full
-        "
-        >
+        <div className="prose prose-lg p-3 flex flex-col items-center flex-grow flex-shrink-0 w-full max-w-full">
           <CustomContent
             content={data.content}
             path={path}
