@@ -92,9 +92,23 @@ const processContent = async (content: string): Promise<string> => {
   return result;
 };
 
-const readAndProcessFile = async (filePath: string): Promise<string> => {
+const readAndProcessFile = async (
+  filePath: string
+): Promise<{ content: string; createdAt: string; updatedAt: string }> => {
   const content = await fs.readFile(filePath, "utf8");
-  return processContent(content);
+
+  // 파일 메타데이터 가져오기
+  const stats = await fs.stat(filePath);
+  const createdAt = stats.birthtime.toISOString(); // 생성일자
+  const updatedAt = stats.mtime.toISOString(); // 수정일자
+
+  const processedContent = await processContent(content);
+
+  return {
+    content: processedContent,
+    createdAt,
+    updatedAt,
+  };
 };
 
 export async function GET(
@@ -105,8 +119,18 @@ export async function GET(
     const { path: notePath } = params;
     const fullPath = path.join(OBSIDIAN_DIR, ...notePath);
 
-    const htmlContent = await readAndProcessFile(fullPath);
-    return NextResponse.json({ content: htmlContent });
+    // 파일 읽기 및 생성/수정일자 가져오기
+    const {
+      content: htmlContent,
+      createdAt,
+      updatedAt,
+    } = await readAndProcessFile(fullPath);
+
+    return NextResponse.json({
+      content: htmlContent,
+      createdAt, // 생성일자
+      updatedAt, // 수정일자
+    });
   } catch (error) {
     console.error("Error processing note:", error);
 
