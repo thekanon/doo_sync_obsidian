@@ -41,17 +41,18 @@ export async function middleware(request: NextRequest) {
 
   // 비로그인 사용자 방문 횟수 체크
   if (!user) {
+    // 공개 페이지는 방문 횟수 체크하지 않음
     if (isPublicPage(path)) {
       return response;
     }
 
-    const visitResponse = await handleVisitCount(request);
-    if (visitResponse) return visitResponse;
+    // 그 외에는 방문 횟수 체크 하여 방문 횟수가 10회 이상이면 리다이렉트
+    await handleVisitCount(request);
   } else {
     console.log("user.role", user.role);
   }
 
-  // 페이지 권한 체크
+  // 페이지 권한 체크하여 권한이 없는 경우 리다이렉트
   if (!hasPermission(user?.role as UserRole, path)) {
     console.log("👮‍♂️ permission check failed");
     return NextResponse.redirect(new URL("/unauthorized", request.url));

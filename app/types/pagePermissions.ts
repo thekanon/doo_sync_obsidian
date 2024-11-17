@@ -48,6 +48,11 @@ export const pagePermissions: PagePermission[] = [
     isPublic: false,
   },
   {
+    path: "/7. 생각정리/커리어*",
+    allowedRoles: [UserRole.ADMIN],
+    isPublic: false,
+  },
+  {
     path: "/*/_Index_of_99.일기*",
     allowedRoles: [UserRole.ADMIN],
     isPublic: false,

@@ -39,7 +39,7 @@ export default function FileLink({
 
   return (
     <Link
-      href={href}
+      href={isLocked ? "/unauthorized" : href}
       className={`
         ${baseClasses}
         ${colorClasses}
