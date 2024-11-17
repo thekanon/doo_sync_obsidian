@@ -145,7 +145,7 @@ export const handleVisitCount = async (
   const currentCount = await getVisitCount(request);
 
   // 비공개 페이지이고 방문 횟수가 제한을 넘은 경우
-  if (currentCount >= 5 && !isPublicPage(request.nextUrl.pathname)) {
+  if (currentCount >= 10 && !isPublicPage(request.nextUrl.pathname)) {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
 
