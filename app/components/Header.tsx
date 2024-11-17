@@ -61,7 +61,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
           </span>
           {isLoggedIn ? (
             <Link
-              href="/profile"
+              href="/login"
               className="rounded p-1.5 hover:bg-gray-100 transition-colors"
               aria-label="Profile"
             >
