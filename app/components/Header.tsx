@@ -45,40 +45,38 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
           <IconImage src="/Iconly/Light/Search.svg" />
         </button>
 
-        {isLoggedIn ? (
-          <>
-            <button
-              className="rounded p-1.5 hover:bg-gray-100 transition-colors"
-              aria-label="Notifications"
-            >
-              <IconImage src="/Iconly/Light/Notification.svg" />
-            </button>
+        <button
+          className="rounded p-1.5 hover:bg-gray-100 transition-colors"
+          aria-label="Notifications"
+        >
+          <IconImage src="/Iconly/Light/Notification.svg" />
+        </button>
 
-            <div className="flex items-center gap-3">
-              <span
-                className={`text-xs px-3 py-1.5 rounded-full font-medium ${ROLE_STYLES[userRole]}`}
-                title={`User Role: ${userRoleText}`}
-              >
-                {userRoleText}
-              </span>
-              <Link
-                href="/login"
-                className="rounded p-1.5 hover:bg-gray-100 transition-colors"
-                aria-label="Logout"
-              >
-                <IconImage src="/Iconly/Light/Logout.svg" alt="Logout" />
-              </Link>
-            </div>
-          </>
-        ) : (
-          <Link
-            href="/login"
-            className="rounded p-1.5 hover:bg-gray-100 transition-colors"
-            aria-label="Login"
+        <div className="flex items-center gap-3">
+          <span
+            className={`text-xs px-3 py-1.5 rounded-full font-medium ${ROLE_STYLES[userRole]}`}
+            title={`User Role: ${userRoleText}`}
           >
-            <IconImage src="/Iconly/Light/Login.svg" alt="Login" />
-          </Link>
-        )}
+            {userRoleText}
+          </span>
+          {isLoggedIn ? (
+            <Link
+              href="/profile"
+              className="rounded p-1.5 hover:bg-gray-100 transition-colors"
+              aria-label="Profile"
+            >
+              <IconImage src="/Iconly/Light/Profile.svg" alt="Profile" />
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="rounded p-1.5 hover:bg-gray-100 transition-colors"
+              aria-label="Login"
+            >
+              <IconImage src="/Iconly/Light/Login.svg" alt="Login" />
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   );
