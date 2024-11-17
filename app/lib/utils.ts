@@ -51,10 +51,13 @@ export const isPublicPage = (path: string): boolean => {
 
     return regexPattern.test(decodedPath);
   });
-  console.log("🔒 path", path);
+  console.log("🔒 decodedPath", decodedPath);
   console.log("🔒 permissionpermission", permission);
+  console.log("🔒 permission?.isPublic", permission?.isPublic ?? false);
 
-  return permission?.isPublic ?? false;
+  if (!permission) return false; // 정의되지 않은 경로는 기본적으로 공개 페이지
+
+  return permission.isPublic ?? false;
 };
 
 // 현재 사용자 정보 가져오기
