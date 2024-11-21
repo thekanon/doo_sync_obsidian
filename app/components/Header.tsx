@@ -40,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
     }
 
     setLastScrollY(currentScrollY);
-  }, 50); // 100ms로 디바운싱
+  }, 50); // 50ms로 디바운싱
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
