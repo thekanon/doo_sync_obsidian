@@ -1,19 +1,23 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { User, UserRole } from "../types/user";
 import { AUTH_STATUS_MESSAGES } from "@/app/types/auth";
+import { debounce } from "es-toolkit";
 
 interface HeaderProps {
   user?: User;
 }
 
 const Header: React.FC<HeaderProps> = ({ user }) => {
-  const userRole = user?.role ?? UserRole.ANONYMOUS; // null 병합 연산자 사용
-  const userRoleText = AUTH_STATUS_MESSAGES[userRole];
-  const isLoggedIn = userRole !== UserRole.ANONYMOUS; // 명확한 로그인 상태 체크
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
-  // 상수로 분리하여 재사용성 향상
+  const userRole = user?.role ?? UserRole.ANONYMOUS;
+  const userRoleText = AUTH_STATUS_MESSAGES[userRole];
+  const isLoggedIn = userRole !== UserRole.ANONYMOUS;
+
   const ROLE_STYLES = {
     [UserRole.ADMIN]: "bg-red-100 text-red-800",
     [UserRole.VERIFIED]: "bg-blue-100 text-blue-800",
@@ -21,13 +25,41 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
     [UserRole.ANONYMOUS]: "bg-gray-100 text-gray-800",
   } as const;
 
-  // 이미지 공통 속성 추출
   const IconImage = ({ src, alt = "Icon" }: { src: string; alt?: string }) => (
     <Image src={src} width={24} height={24} alt={alt} />
   );
 
+  // 스크롤 이벤트 핸들러 (Debounce 적용)
+  const handleScroll = React.useCallback(() => {
+    const debouncedScroll = debounce(() => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY > lastScrollY) {
+        setIsVisible(false); // 스크롤 내릴 때 숨김
+      } else {
+        setIsVisible(true); // 스크롤 올릴 때 표시
+      }
+
+      setLastScrollY(currentScrollY);
+    }, 50); // 50ms로 디바운싱
+
+    debouncedScroll();
+  }, [lastScrollY]);
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [handleScroll]);
+
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between bg-white px-4 py-2 shadow-md">
+    <header
+      className={`sticky top-0 z-50 flex items-center justify-between bg-white px-4 py-2 shadow-md transition-transform ${
+        isVisible ? "translate-y-0" : "-translate-y-full"
+      }`}
+    >
       <Link
         className="flex items-center gap-2 hover:opacity-80 transition-opacity"
         href="/"

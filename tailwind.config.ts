@@ -38,14 +38,14 @@ const config: Config = {
               color: theme("colors.gray.800"),
               fontWeight: "700",
               fontSize: theme("fontSize.2xl"),
-              marginTop: theme("spacing.10"),
+              marginTop: theme("spacing.4"),
               marginBottom: theme("spacing.4"),
             },
             h3: {
               color: theme("colors.gray.800"),
               fontWeight: "600",
               fontSize: theme("fontSize.xl"),
-              marginTop: theme("spacing.8"),
+              marginTop: theme("spacing.3"),
               marginBottom: theme("spacing.3"),
             },
             p: {
@@ -87,7 +87,6 @@ const config: Config = {
               paddingBottom: theme("spacing.3"),
               paddingLeft: theme("spacing.4"),
               maxWidth: "95vw", // 추가된 maxWidth 설정
-
             },
             "pre code": {
               backgroundColor: "transparent",

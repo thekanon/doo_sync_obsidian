@@ -46,21 +46,21 @@ export default function FileLink({
         ${!isLocked && "hover:shadow-sm"}
       `}
     >
-      {/* Left side: Icon and text */}
-      <span className="flex items-center gap-3">
+      <span className="flex items-center gap-3 min-w-0">
         <Icon
-          className={`w-5 h-5 ${
+          className={`w-5 h-5 flex-shrink-0 ${
             isDirectory ? "text-blue-500" : "text-amber-500"
           }`}
         />
-        <span className="font-medium">{text}</span>
+        <span className="font-medium break-keep">{text}</span>
       </span>
 
-      {/* Right side: Lock and date */}
       <span className="flex items-center ml-auto gap-3">
         {isLocked && <Lock className="w-4 h-4 text-gray-400" />}
         {createdAt && (
-          <span className="text-sm text-gray-500">{formatDate(createdAt)}</span>
+          <span className="text-sm text-gray-500 scale-75 origin-left">
+            {formatDate(createdAt)}
+          </span>
         )}
       </span>
     </Link>
