@@ -6,9 +6,9 @@ const ObsidianLayout = async ({ children }: { children: React.ReactNode }) => {
   const user = (await getServerUser()) ?? undefined;
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex min-h-screen flex-col">
       <Header user={user} />
-      <div className="flex-grow overflow-y-auto">{children}</div>
+      <div className="flex-grow">{children}</div>
     </div>
   );
 };

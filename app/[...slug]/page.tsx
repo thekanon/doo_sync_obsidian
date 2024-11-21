@@ -159,7 +159,23 @@ function CustomContent({
     [content, path, role, updatedAt, createdAt]
   );
 
-  return <div>{parsedContent}</div>;
+  return (
+    <div className="w-full sm:min-w-[600px] md:min-w-[800px] lg:min-w-[1000px] xl:min-w-[1200px] 2xl:min-w-[1400px]">
+      {React.Children.map(parsedContent, (child, index) => {
+        if (
+          React.isValidElement(child) &&
+          typeof child.type === "string" && // DOM 요소인지 확인
+          child.type === "p" &&
+          index === 0
+        ) {
+          return React.cloneElement(child as React.ReactElement<any>, {
+            className: `${child.props.className || ""} mt-0`.trim(),
+          });
+        }
+        return child;
+      })}
+    </div>
+  );
 }
 
 async function fetchObsidianData(path: string): Promise<ObsidianData> {
@@ -184,7 +200,7 @@ export default async function Page({ params }: { params: Params }) {
 
     return (
       <div>
-        <div className="prose prose-lg p-3 flex flex-col items-center flex-grow flex-shrink-0 w-full max-w-full">
+        <div className="prose prose-sm p-3 pt-0 flex flex-col items-center flex-grow flex-shrink-0 w-full max-w-full">
           <CustomContent
             content={data.content}
             path={path}
