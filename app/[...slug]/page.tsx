@@ -163,12 +163,12 @@ function CustomContent({
     <div className="w-full sm:min-w-[600px] md:min-w-[800px] lg:min-w-[1000px] xl:min-w-[1200px] 2xl:min-w-[1400px]">
       {React.Children.map(parsedContent, (child, index) => {
         if (
-          React.isValidElement(child) &&
+          React.isValidElement<{ className?: string }>(child) && // 클래스 속성 확인
           typeof child.type === "string" && // DOM 요소인지 확인
           child.type === "p" &&
           index === 0
         ) {
-          return React.cloneElement(child as React.ReactElement<any>, {
+          return React.cloneElement(child, {
             className: `${child.props.className || ""} mt-0`.trim(),
           });
         }
