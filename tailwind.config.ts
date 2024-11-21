@@ -86,6 +86,8 @@ const config: Config = {
               paddingRight: theme("spacing.4"),
               paddingBottom: theme("spacing.3"),
               paddingLeft: theme("spacing.4"),
+              maxWidth: "95vw", // 추가된 maxWidth 설정
+
             },
             "pre code": {
               backgroundColor: "transparent",
