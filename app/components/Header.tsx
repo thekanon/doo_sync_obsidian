@@ -29,30 +29,20 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
     <Image src={src} width={24} height={24} alt={alt} />
   );
 
-  // 스크롤 이벤트 핸들러 (Debounce 적용)
-  const handleScroll = React.useCallback(() => {
-    const debouncedScroll = debounce(() => {
-      const currentScrollY = window.scrollY;
-
-      if (currentScrollY > lastScrollY) {
-        setIsVisible(false); // 스크롤 내릴 때 숨김
-      } else {
-        setIsVisible(true); // 스크롤 올릴 때 표시
-      }
-
-      setLastScrollY(currentScrollY);
-    }, 50); // 50ms로 디바운싱
-
-    debouncedScroll();
-  }, [lastScrollY]);
-
   useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
+    const handleScroll = debounce(() => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      setLastScrollY(currentScrollY);
+    }, 50);
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [handleScroll]);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
 
   return (
     <header
