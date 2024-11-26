@@ -163,7 +163,6 @@ function CustomContent({
     () => parseHtmlToReact(content, path, role, updatedAt, createdAt),
     [content, path, role, updatedAt, createdAt]
   );
-  console.log(content);
 
   return (
     <div className="w-full sm:min-w-[600px] md:min-w-[800px] lg:min-w-[1000px] xl:min-w-[1200px] 2xl:min-w-[1400px]">
