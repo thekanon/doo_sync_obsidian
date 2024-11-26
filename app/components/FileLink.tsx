@@ -8,6 +8,7 @@ interface FileLinkProps {
   isDirectory?: boolean;
   isLocked?: boolean;
   createdAt?: string;
+  updatedAt?: string;
 }
 
 export default function FileLink({
@@ -16,6 +17,7 @@ export default function FileLink({
   isDirectory = false,
   isLocked = false,
   createdAt,
+  updatedAt,
 }: FileLinkProps) {
   const Icon = isDirectory ? Folder : File;
   const baseClasses =
@@ -57,9 +59,14 @@ export default function FileLink({
 
       <span className="flex items-center ml-auto gap-3">
         {isLocked && <Lock className="w-4 h-4 text-gray-400" />}
-        {createdAt && (
+        {/* {createdAt && (
           <span className="text-sm text-gray-500 scale-75 origin-left">
             {formatDate(createdAt)}
+          </span>
+        )} */}
+        {updatedAt && (
+          <span className="text-sm text-gray-500 scale-75 origin-left">
+            {formatDate(updatedAt)}
           </span>
         )}
       </span>

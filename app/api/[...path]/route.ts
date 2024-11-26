@@ -92,22 +92,58 @@ const processContent = async (content: string): Promise<string> => {
   return result;
 };
 
+const readDirectoryFiles = async (dirPath: string) => {
+  const files = await fs.readdir(dirPath);
+  const fileStats = await Promise.all(
+    files.map(async (file) => {
+      const fullPath = path.join(dirPath, file);
+      const stats = await fs.stat(fullPath);
+      return {
+        name: file,
+        updatedAt: stats.mtime.toISOString(),
+        createdAt: stats.birthtime.toISOString(),
+        isDirectory: stats.isDirectory(),
+      };
+    })
+  );
+  return fileStats;
+};
+
 const readAndProcessFile = async (
   filePath: string
-): Promise<{ content: string; createdAt: string; updatedAt: string }> => {
+): Promise<{
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  directoryFiles?: Array<{
+    name: string;
+    updatedAt: string;
+    createdAt: string;
+    isDirectory: boolean;
+  }>;
+}> => {
   const content = await fs.readFile(filePath, "utf8");
-
-  // 파일 메타데이터 가져오기
   const stats = await fs.stat(filePath);
-  const createdAt = stats.birthtime.toISOString(); // 생성일자
-  const updatedAt = stats.mtime.toISOString(); // 수정일자
+
+  // Check if this is an index file
+  const fileName = path.basename(filePath);
+  const isIndexFile = fileName.includes("_Index_of_");
+
+  let directoryFiles;
+  if (isIndexFile) {
+    // Get the directory path (parent directory of the index file)
+    const dirPath = path.dirname(filePath);
+    directoryFiles = await readDirectoryFiles(dirPath);
+    console.log("Directory files:", directoryFiles);
+  }
 
   const processedContent = await processContent(content);
 
   return {
     content: processedContent,
-    createdAt,
-    updatedAt,
+    createdAt: stats.birthtime.toISOString(),
+    updatedAt: stats.mtime.toISOString(),
+    directoryFiles: directoryFiles,
   };
 };
 
@@ -119,28 +155,27 @@ export async function GET(
     const { path: notePath } = params;
     const fullPath = path.join(OBSIDIAN_DIR, ...notePath);
 
-    // 파일 읽기 및 생성/수정일자 가져오기
     const {
       content: htmlContent,
       createdAt,
       updatedAt,
+      directoryFiles,
     } = await readAndProcessFile(fullPath);
 
     return NextResponse.json({
       content: htmlContent,
-      createdAt, // 생성일자
-      updatedAt, // 수정일자
+      createdAt,
+      updatedAt,
+      directoryFiles,
     });
   } catch (error) {
     console.error("Error processing note:", error);
-
     if (
       error instanceof Error &&
       (error as NodeJS.ErrnoException).code === "ENOENT"
     ) {
       return NextResponse.json({ error: "Note not found" }, { status: 404 });
     }
-
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -19,6 +19,12 @@ type ObsidianData = {
   content: string;
   createdAt?: string;
   updatedAt?: string;
+  directoryFiles?: Array<{
+    name: string;
+    updatedAt: string;
+    createdAt: string;
+    isDirectory: boolean;
+  }>;
 };
 
 function parseHtmlToReact(
@@ -26,7 +32,13 @@ function parseHtmlToReact(
   path: string,
   role?: UserRole,
   updatedAt?: string,
-  createdAt?: string
+  createdAt?: string,
+  directoryFiles?: Array<{
+    name: string;
+    updatedAt: string;
+    createdAt: string;
+    isDirectory: boolean;
+  }>
 ): React.ReactNode {
   const window = new JSDOM("").window;
   const purify = DOMPurify(window as unknown as Window);
@@ -83,6 +95,15 @@ function parseHtmlToReact(
             const directoryText = text.replace(/_Index_of_/g, "");
             const isLocked = !hasPermission(role, props.href);
 
+            const fileName =
+              decodeURIComponent(props.href).split("/").pop() || "";
+            const convertFileName = fileName
+              .replace(/_Index_of_/g, "")
+              .replace(/.md/g, "");
+            const fileInfo = directoryFiles?.find(
+              (f) => f.name === convertFileName
+            );
+            console.log("fileInfo", fileInfo, convertFileName);
             return (
               <FileLink
                 key={node.rawText}
@@ -90,16 +111,22 @@ function parseHtmlToReact(
                 text={directoryText}
                 isDirectory
                 isLocked={isLocked}
-                createdAt={createdAt}
+                createdAt={fileInfo?.updatedAt}
+                updatedAt={fileInfo?.updatedAt}
               />
             );
           } else {
+            const fileName =
+              decodeURIComponent(props.href).split("/").pop() || "";
+            const fileInfo = directoryFiles?.find((f) => f.name === fileName);
+
             return (
               <FileLink
                 key={node.rawText}
                 href={props.href}
                 text={text}
-                createdAt={createdAt}
+                createdAt={fileInfo?.createdAt}
+                updatedAt={fileInfo?.updatedAt}
               />
             );
           }
@@ -115,11 +142,39 @@ function parseHtmlToReact(
           ): child is React.ReactElement<{
             href: string;
             isDirectory?: boolean;
+            updatedAt?: string;
           }> => React.isValidElement(child) && !!child.props.href
         );
 
-        const directories = links.filter((link) => link.props.isDirectory);
-        const files = links.filter((link) => !link.props.isDirectory);
+        // 루트 경로인지 확인
+        const isRoot = path === "_Index_of_Root.md";
+
+        // 디렉토리와 파일 분리
+        let directories = links.filter((link) => link.props.isDirectory);
+        let files = links.filter((link) => !link.props.isDirectory);
+
+        // 루트가 아닐 때만 정렬 적용
+        if (!isRoot) {
+          directories = directories.sort((a, b) => {
+            const dateA = a.props.updatedAt
+              ? new Date(a.props.updatedAt)
+              : new Date(0);
+            const dateB = b.props.updatedAt
+              ? new Date(b.props.updatedAt)
+              : new Date(0);
+            return dateB.getTime() - dateA.getTime();
+          });
+
+          files = files.sort((a, b) => {
+            const dateA = a.props.updatedAt
+              ? new Date(a.props.updatedAt)
+              : new Date(0);
+            const dateB = b.props.updatedAt
+              ? new Date(b.props.updatedAt)
+              : new Date(0);
+            return dateB.getTime() - dateA.getTime();
+          });
+        }
 
         return React.createElement("p", { key: node.rawText }, [
           ...directories,
@@ -152,24 +207,39 @@ function CustomContent({
   role,
   updatedAt,
   createdAt,
+  directoryFiles,
 }: {
   content: string;
   path: string;
   role?: UserRole;
   updatedAt?: string;
   createdAt?: string;
+  directoryFiles?: Array<{
+    name: string;
+    updatedAt: string;
+    createdAt: string;
+    isDirectory: boolean;
+  }>;
 }) {
   const parsedContent = React.useMemo(
-    () => parseHtmlToReact(content, path, role, updatedAt, createdAt),
-    [content, path, role, updatedAt, createdAt]
+    () =>
+      parseHtmlToReact(
+        content,
+        path,
+        role,
+        updatedAt,
+        createdAt,
+        directoryFiles
+      ),
+    [content, path, role, updatedAt, createdAt, directoryFiles]
   );
 
   return (
     <div className="w-full sm:min-w-[600px] md:min-w-[800px] lg:min-w-[1000px] xl:min-w-[1200px] 2xl:min-w-[1400px]">
       {React.Children.map(parsedContent, (child, index) => {
         if (
-          React.isValidElement<{ className?: string }>(child) && // 클래스 속성 확인
-          typeof child.type === "string" && // DOM 요소인지 확인
+          React.isValidElement<{ className?: string }>(child) &&
+          typeof child.type === "string" &&
           child.type === "p" &&
           index === 0
         ) {
@@ -201,8 +271,6 @@ export default async function Page({ params }: { params: Params }) {
     const data = await fetchObsidianData(path);
     const user = await getServerUser();
 
-    console.log(data.updatedAt, data.createdAt);
-
     return (
       <div>
         <div className="prose prose-sm p-3 pt-0 flex flex-col items-center flex-grow flex-shrink-0 w-full max-w-full">
@@ -212,6 +280,7 @@ export default async function Page({ params }: { params: Params }) {
             role={user?.role}
             updatedAt={data.updatedAt}
             createdAt={data.createdAt}
+            directoryFiles={data.directoryFiles}
           />
         </div>
       </div>
