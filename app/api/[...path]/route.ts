@@ -125,13 +125,11 @@ const readAndProcessFile = async (
   const content = await fs.readFile(filePath, "utf8");
   const stats = await fs.stat(filePath);
 
-  // Check if this is an index file
   const fileName = path.basename(filePath);
   const isIndexFile = fileName.includes("_Index_of_");
 
   let directoryFiles;
   if (isIndexFile) {
-    // Get the directory path (parent directory of the index file)
     const dirPath = path.dirname(filePath);
     directoryFiles = await readDirectoryFiles(dirPath);
     console.log("Directory files:", directoryFiles);

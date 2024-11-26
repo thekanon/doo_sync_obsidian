@@ -16,7 +16,6 @@ export default function FileLink({
   text,
   isDirectory = false,
   isLocked = false,
-  createdAt,
   updatedAt,
 }: FileLinkProps) {
   const Icon = isDirectory ? Folder : File;

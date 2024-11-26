@@ -103,7 +103,6 @@ function parseHtmlToReact(
             const fileInfo = directoryFiles?.find(
               (f) => f.name === convertFileName
             );
-            console.log("fileInfo", fileInfo, convertFileName);
             return (
               <FileLink
                 key={node.rawText}
