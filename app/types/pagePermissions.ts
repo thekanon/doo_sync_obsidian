@@ -81,11 +81,11 @@ export const pagePermissions: PagePermission[] = [
   },
 
   // 어드민, 인증된 사용자, 게스트만 접근 가능
-  {
-    path: "/5. 프로젝트/*",
-    allowedRoles: [UserRole.ADMIN, UserRole.VERIFIED, UserRole.GUEST],
-    isPublic: false,
-  },
+  // {
+  //   path: "/5. 프로젝트/*",
+  //   allowedRoles: [UserRole.ADMIN, UserRole.VERIFIED, UserRole.GUEST],
+  //   isPublic: false,
+  // },
 ];
 
 export const isPublicPageList = [
