@@ -65,6 +65,11 @@ function parseHtmlToReact(
     if (node instanceof HTMLElement) {
       const props = node.attributes;
 
+      if (node.tagName.toLowerCase() === "input" && props.type === "checkbox") {
+        (props as { checked: boolean | "" }).checked =
+          props.checked === "" ? true : false;
+      }
+
       if (node.tagName.toLowerCase() === "a") {
         if (!isIndexPage) {
           return React.createElement(
