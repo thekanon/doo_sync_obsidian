@@ -3,6 +3,7 @@ module.exports = {
     {
       name: "my-app",
       script: "npm",
+      max_memory_restart: "512M", // 512MB 초과 시 재시작
       args: "start",
       instances: "max",
       exec_mode: "cluster",
