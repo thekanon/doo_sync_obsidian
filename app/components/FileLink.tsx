@@ -46,6 +46,7 @@ export default function FileLink({
         ${colorClasses}
         ${!isLocked && "hover:shadow-sm"}
       `}
+      aria-disabled={isLocked}
     >
       <span className="flex items-center gap-3 min-w-0">
         <Icon
