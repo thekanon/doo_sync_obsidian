@@ -1,14 +1,13 @@
-/** @type {import('next').NextConfig} */
+// next.config.mjs (ES Module 방식)
 const nextConfig = {
   webpack: (config, { isServer }) => {
     if (isServer) {
-      if (!Array.isArray(config.externals)) {
-        config.externals = config.externals ? [config.externals] : [];
-      }
-      config.externals.push('firebase-admin');
+      config.externals = Array.isArray(config.externals)
+        ? ['firebase-admin', ...config.externals]
+        : ['firebase-admin'];
     }
     return config;
-  },
+  }
 };
 
-module.exports = nextConfig;
+export default nextConfig;
