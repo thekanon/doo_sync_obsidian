@@ -1,4 +1,4 @@
-// next.config.mjs (ES Module 방식)
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   webpack: (config, { isServer }) => {
     if (isServer) {
