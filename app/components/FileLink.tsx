@@ -54,7 +54,7 @@ export default function FileLink({
             isDirectory ? "text-blue-500" : "text-amber-500"
           }`}
         />
-        <span className="font-medium break-keep">{text}</span>
+        <span>{text}</span>
       </span>
 
       <span className="flex items-center ml-auto gap-3">

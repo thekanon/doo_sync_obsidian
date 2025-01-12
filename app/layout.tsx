@@ -7,7 +7,7 @@ const geistSans = localFont({
   variable: "--font-geist-sans",
   weight: "100 900",
   display: "swap",
-  preload: true, 
+  preload: true,
 });
 
 const geistMono = localFont({
@@ -15,6 +15,7 @@ const geistMono = localFont({
   variable: "--font-geist-mono",
   weight: "100 900",
   display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {
