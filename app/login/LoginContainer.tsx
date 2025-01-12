@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import firebase from "firebase/compat/app";
-import * as firebaseui from "firebaseui";
+import { auth } from "firebaseui";
 import "firebase/compat/auth";
 import {
   handleAuthentication,
@@ -90,8 +90,8 @@ const LoginPage = () => {
       console.log("FirebaseUI 초기화 중");
 
       const ui =
-        firebaseui.auth.AuthUI.getInstance() ||
-        new firebaseui.auth.AuthUI(firebase.auth());
+        auth.AuthUI.getInstance() ||
+        new auth.AuthUI(firebase.auth());
       ui.start("#firebaseui-auth-container", {
         callbacks: {
           // Called when the user has been successfully signed in.
@@ -121,10 +121,10 @@ const LoginPage = () => {
               status: false,
             },
           },
-          firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID,
+          auth.AnonymousAuthProvider.PROVIDER_ID,
         ],
         signInFlow: "popup",
-        credentialHelper: firebaseui.auth.CredentialHelper.NONE,
+        credentialHelper: auth.CredentialHelper.NONE,
         adminRestrictedOperation: {
           status: true,
         },
