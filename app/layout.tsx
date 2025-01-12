@@ -1,22 +1,7 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import "./globals.css";
-
-const geistSans = localFont({
-  src: "./fonts/Geist[wght].woff2",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-  display: "swap",
-  preload: true,
-});
-
-const geistMono = localFont({
-  src: "./fonts/GeistMono[wght].woff2",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-  display: "swap",
-  preload: true,
-});
 
 export const metadata: Metadata = {
   title: {
@@ -42,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased leading-relaxed text-gray-900 bg-white`}
+        className={`${GeistSans.className} ${GeistMono.className} antialiased leading-relaxed text-gray-900 bg-white`}
       >
         {children}
       </body>
