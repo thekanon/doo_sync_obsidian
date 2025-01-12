@@ -2,10 +2,13 @@
 const nextConfig = {
   webpack: (config, { isServer }) => {
     if (isServer) {
-      config.externals = ['firebase-admin', ...config.externals];
+      if (!Array.isArray(config.externals)) {
+        config.externals = config.externals ? [config.externals] : [];
+      }
+      config.externals.push('firebase-admin');
     }
     return config;
-  }
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
