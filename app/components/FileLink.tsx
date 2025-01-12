@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import Link from "next/link";
 import { File, Folder, Lock } from "lucide-react";
 
@@ -11,7 +11,12 @@ interface FileLinkProps {
   updatedAt?: string;
 }
 
-export default function FileLink({
+const MemoizedText = React.memo(function MemoizedText({ text }: { text: string }) {
+  return <span>{text}</span>;
+});
+
+
+export default memo(function FileLink({
   href,
   text,
   isDirectory = false,
@@ -54,7 +59,7 @@ export default function FileLink({
             isDirectory ? "text-blue-500" : "text-amber-500"
           }`}
         />
-        <span>{text}</span>
+        <MemoizedText text={text} />
       </span>
 
       <span className="flex items-center ml-auto gap-3">
@@ -72,4 +77,4 @@ export default function FileLink({
       </span>
     </Link>
   );
-}
+})
