@@ -1,3 +1,4 @@
+import dynamic from "next/dynamic";
 import React from "react";
 import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
@@ -7,7 +8,6 @@ import {
   Node as HTMLNode,
   TextNode,
 } from "node-html-parser";
-import FileLink from "@/app/components/FileLink";
 import { getHost, getServerUser, hasPermission } from "@/app/lib/utils";
 import { UserRole } from "../types/user";
 
@@ -26,6 +26,10 @@ type ObsidianData = {
     isDirectory: boolean;
   }>;
 };
+
+const FileLink = dynamic(() => import('@/app/components/FileLink'), {
+  ssr: true
+});
 
 function parseHtmlToReact(
   html: string,
