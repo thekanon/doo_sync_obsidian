@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import firebase from "firebase/compat/app";
+import * as firebaseui from "firebaseui";
 import "firebase/compat/auth";
 import {
   handleAuthentication,
@@ -85,56 +86,55 @@ const LoginPage = () => {
   }, []);
 
   useEffect(() => {
-    const initFirebaseUI = async () => {
-      const { default: firebaseui } = await import("firebaseui");
+    if (!user) {
+      console.log("FirebaseUI 초기화 중");
 
-      if (!user) {
-        console.log("FirebaseUI 초기화 중");
+      const ui =
+        firebaseui.auth.AuthUI.getInstance() ||
+        new firebaseui.auth.AuthUI(firebase.auth());
+      ui.start("#firebaseui-auth-container", {
+        callbacks: {
+          // Called when the user has been successfully signed in.
+          signInSuccessWithAuthResult: function (authResult) {
+            if (authResult.user) {
+              console.log(authResult.user);
+            }
+            if (authResult.additionalUserInfo) {
+              console.log(authResult.additionalUserInfo);
+            }
+            // Do not redirect.
+            return false;
+          },
+        },
 
-        const ui =
-          firebaseui.auth.AuthUI.getInstance() ||
-          new firebaseui.auth.AuthUI(firebase.auth());
-
-        ui.start("#firebaseui-auth-container", {
-          callbacks: {
-            signInSuccessWithAuthResult: (authResult) => {
-              if (authResult.user) {
-                console.log(authResult.user);
-              }
-              if (authResult.additionalUserInfo) {
-                console.log(authResult.additionalUserInfo);
-              }
-              return false;
+        signInOptions: [
+          {
+            provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+            clientId:
+              "756100070951-a5imkvop1rbjb8poeb1q7tnedkd2872d.apps.googleusercontent.com",
+          },
+          {
+            provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+            requireDisplayName: false,
+            signInMethod: "password",
+            disableSignUp: {
+              status: false,
             },
           },
-          signInOptions: [
-            {
-              provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-              clientId:
-                "756100070951-a5imkvop1rbjb8poeb1q7tnedkd2872d.apps.googleusercontent.com",
-            },
-            {
-              provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-              requireDisplayName: false,
-              signInMethod: "password",
-              disableSignUp: { status: false },
-            },
-            firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID,
-          ],
-          signInFlow: "popup",
-          credentialHelper: firebaseui.auth.CredentialHelper.NONE,
-          adminRestrictedOperation: { status: true },
-        });
+          firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID,
+        ],
+        signInFlow: "popup",
+        credentialHelper: firebaseui.auth.CredentialHelper.NONE,
+        adminRestrictedOperation: {
+          status: true,
+        },
+      });
 
-        ui.disableAutoSignIn();
-      } else {
-        getAuthInfo(user);
-      }
-    };
-
-    initFirebaseUI();
+      ui.disableAutoSignIn();
+    } else {
+      getAuthInfo(user);
+    }
   }, [user]);
-
 
   const getAuthInfo = async (user: firebase.User) => {
     try {
