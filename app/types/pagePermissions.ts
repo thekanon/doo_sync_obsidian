@@ -1,7 +1,7 @@
 /**
  * 페이지 권한 정보
  */
-import { UserRole } from "./user";
+import { UserRole } from './user';
 
 interface PagePermission {
   path: string; // 페이지 경로
@@ -12,71 +12,71 @@ interface PagePermission {
 export const pagePermissions: PagePermission[] = [
   // 모든 사용자 접근 가능
   {
-    path: "/",
+    path: '/',
     allowedRoles: [],
     isPublic: true,
   },
   {
-    path: "/login*",
+    path: '/login*',
     allowedRoles: [],
     isPublic: true,
   },
   {
-    path: "/_Index_of_Root*",
+    path: '/_Index_of_Root*',
     allowedRoles: [],
     isPublic: true,
   },
   {
-    path: "/unauthorized",
+    path: '/unauthorized',
     allowedRoles: [],
     isPublic: true,
   },
   // 어드민 권한만 접근 가능
   {
-    path: "/1. 일지/*",
+    path: '/1. 일지/*',
     allowedRoles: [UserRole.ADMIN],
     isPublic: false,
   },
   {
-    path: "/3. 회사/*",
+    path: '/3. 회사/*',
     allowedRoles: [UserRole.ADMIN],
     isPublic: false,
   },
   {
-    path: "/*/_Index_of_커리어*",
+    path: '/*/_Index_of_커리어*',
     allowedRoles: [UserRole.ADMIN],
     isPublic: false,
   },
   {
-    path: "/7. 생각정리/커리어*",
+    path: '/7. 생각정리/커리어*',
     allowedRoles: [UserRole.ADMIN],
     isPublic: false,
   },
   {
-    path: "/*/_Index_of_99.일기*",
+    path: '/*/_Index_of_99.일기*',
     allowedRoles: [UserRole.ADMIN],
     isPublic: false,
   },
   {
-    path: "/97. 보안 폴더/*",
+    path: '/97. 보안 폴더/*',
     allowedRoles: [UserRole.ADMIN],
     isPublic: false,
   },
   {
-    path: "/99. 일기/*",
+    path: '/99. 일기/*',
     allowedRoles: [UserRole.ADMIN],
     isPublic: false,
   },
 
   // 어드민, 인증된 사용자만 접근 가능
   {
-    path: "/8. 루틴/*",
+    path: '/8. 루틴/*',
     allowedRoles: [UserRole.ADMIN, UserRole.VERIFIED],
     isPublic: false,
   },
   {
-    path: "/98. 미분류/*",
-    allowedRoles: [UserRole.ADMIN, UserRole.VERIFIED],
+    path: '/98. 미분류/*',
+    allowedRoles: [UserRole.ADMIN],
     isPublic: false,
   },
 
@@ -88,9 +88,4 @@ export const pagePermissions: PagePermission[] = [
   // },
 ];
 
-export const isPublicPageList = [
-  "/",
-  "/login*",
-  "/_Index_of_Root*",
-  "/unauthorized",
-];
+export const isPublicPageList = ['/', '/login*', '/_Index_of_Root*', '/unauthorized'];
