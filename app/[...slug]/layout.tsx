@@ -1,13 +1,16 @@
-import React from "react";
 import Header from "../components/Header";
 import { getServerUser } from "../lib/utils";
 
-const ObsidianLayout = async ({ children }: { children: React.ReactNode }) => {
-  const user = (await getServerUser()) ?? undefined;
+type LayoutProps = {
+  children: React.ReactNode;
+};
 
+const ObsidianLayout = async ({ children }: LayoutProps) => {
+  const user = await getServerUser();
+  
   return (
     <div className="flex min-h-screen flex-col">
-      <Header user={user} />
+      <Header user={user || undefined} />
       <div className="flex-grow">{children}</div>
     </div>
   );
