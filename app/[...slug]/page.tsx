@@ -27,8 +27,8 @@ type ObsidianData = {
   }>;
 };
 
-const FileLink = dynamic(() => import('@/app/components/FileLink'), {
-  ssr: true
+const FileLink = dynamic(() => import("@/app/components/FileLink"), {
+  ssr: true,
 });
 
 function parseHtmlToReact(
@@ -45,7 +45,7 @@ function parseHtmlToReact(
   }>
 ): React.ReactNode {
   const window = new JSDOM("").window;
-  const purify = DOMPurify(window as unknown as Window);
+  const purify = DOMPurify(window);
   const sanitizedHtml = purify.sanitize(html);
   const root = parse(sanitizedHtml);
 
