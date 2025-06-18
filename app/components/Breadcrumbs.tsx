@@ -9,15 +9,24 @@ import { usePathname } from 'next/navigation'
 export default function Breadcrumbs() {
   const pathname = usePathname()
   const encodedSegments = pathname.split('/').filter(Boolean)
+
   const decodedSegments = encodedSegments.map(decodeURIComponent)
 
-  // 루트 인덱스 페이지는 홈만 표시
-  if (
-    decodedSegments.length === 1 &&
-    decodedSegments[0] === '_Index_of_Root.md'
-  ) {
-    encodedSegments.length = 0
-    decodedSegments.length = 0
+  // 마지막 세그먼트가 인덱스 파일인지 확인
+  const last = encodedSegments[encodedSegments.length - 1]
+
+  const isIndexFile = last?.startsWith('_Index_of_')
+
+  if (isIndexFile) {
+    // 루트 인덱스는 홈만 표시
+    if (last === '_Index_of_Root.md') {
+      encodedSegments.length = 0
+      decodedSegments.length = 0
+    } else {
+      // 인덱스 파일 세그먼트 제거
+      encodedSegments.pop()
+      decodedSegments.pop()
+    }
   }
 
   return (
@@ -39,7 +48,12 @@ export default function Breadcrumbs() {
 
           let href: string
           if (isLast) {
-            href = '/' + encodedSegments.slice(0, index + 1).join('/')
+            if (isIndexFile) {
+              const parts = [...encodedSegments.slice(0, index + 1), last]
+              href = '/' + parts.join('/')
+            } else {
+              href = '/' + encodedSegments.slice(0, index + 1).join('/')
+            }
           } else {
             const base = encodedSegments.slice(0, index + 1).join('/')
             href =
