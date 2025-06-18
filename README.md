@@ -1,4 +1,4 @@
-# 두 싱크 옵시디언
+# doo_sync_obsidian
 
 이 프로젝트는 옵시디언 저장소에 있는 마크다운 파일을 Next.js로 렌더링하는 위키 서비스입니다. GitHub 웹훅을 통해 노트를 동기화하며, Firebase 인증으로 접근을 제어합니다.
 
@@ -27,10 +27,12 @@
 ## 배포
 
 아래 명령으로 프로덕션 서버를 빌드하고 실행합니다.
+
 ```bash
 npm run build
 npm run start
 ```
+
 `ecosystem.config.js`에 PM2 예시 설정이 포함되어 있습니다.
 
 ## 프로젝트 구조
@@ -41,4 +43,3 @@ npm run start
 - `.env_sample` – 환경 변수 예시 파일
 
 노트는 `REPO_PATH/Root`에서 읽어와 페이지로 제공합니다. GitHub에서 `push` 웹훅이 오면 API가 `git pull`을 실행해 최신 내용을 반영합니다.
-
