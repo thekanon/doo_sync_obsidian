@@ -18,15 +18,13 @@ export default function Breadcrumbs() {
   const isIndexFile = last?.startsWith('_Index_of_')
 
   if (isIndexFile) {
-    // 루트 인덱스는 홈만 표시
+    // 루트 인덱스라면 브래드크럼을 표시하지 않음
     if (last === '_Index_of_Root.md') {
-      encodedSegments.length = 0
-      decodedSegments.length = 0
-    } else {
-      // 인덱스 파일 세그먼트 제거
-      encodedSegments.pop()
-      decodedSegments.pop()
+      return null
     }
+    // 인덱스 파일 세그먼트 제거
+    encodedSegments.pop()
+    decodedSegments.pop()
   }
 
   return (
