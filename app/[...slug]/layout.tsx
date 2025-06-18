@@ -1,4 +1,5 @@
 import Header from "../components/Header";
+import Breadcrumbs from "../components/Breadcrumbs";
 import { getServerUser } from "../lib/utils";
 
 type LayoutProps = {
@@ -11,6 +12,7 @@ const ObsidianLayout = async ({ children }: LayoutProps) => {
   return (
     <div className="flex min-h-screen flex-col">
       <Header user={user || undefined} />
+      <Breadcrumbs />
       <div className="flex-grow">{children}</div>
     </div>
   );
