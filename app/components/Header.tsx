@@ -5,6 +5,9 @@ import Image from "next/image";
 import { User, UserRole } from "../types/user";
 import { AUTH_STATUS_MESSAGES } from "@/app/types/auth";
 import { debounce } from "es-toolkit";
+import dynamic from "next/dynamic";
+
+const SearchModal = dynamic(() => import("./SearchModal"), { ssr: false });
 
 interface HeaderProps {
   user?: User;
@@ -13,6 +16,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ user }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const userRole = user?.role ?? UserRole.ANONYMOUS;
   const userRoleText = AUTH_STATUS_MESSAGES[userRole];
@@ -45,6 +49,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
   }, [lastScrollY]);
 
   return (
+    <>
     <header
       className={`sticky top-0 z-50 flex items-center justify-between bg-white px-4 py-2 shadow-md transition-transform ${
         isVisible ? "translate-y-0" : "-translate-y-full"
@@ -63,6 +68,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
         <button
           className="rounded p-1.5 hover:bg-gray-100 transition-colors"
           aria-label="Search"
+          onClick={() => setIsSearchOpen(true)}
         >
           <IconImage src="/Iconly/Light/Search.svg" />
         </button>
@@ -101,6 +107,8 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
         </div>
       </div>
     </header>
+    <SearchModal open={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+    </>
   );
 };
 
