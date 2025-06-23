@@ -4,6 +4,7 @@ import path from "path";
 import { exec, ExecException } from "child_process";
 import { marked } from "marked";
 import { NextRequest, NextResponse } from "next/server";
+import { buildIndex } from "@/services/search/searchService";
 
 // 커스텀 execAsync 함수 정의
 const execAsync = (
@@ -238,6 +239,9 @@ export async function POST(
     }
 
     await fs.writeFile(LAST_PULL_TIME_FILE, Date.now().toString());
+
+    // Update search index with new content
+    await buildIndex(OBSIDIAN_DIR);
 
     return NextResponse.json(
       { content: "Webhook processed and git pull executed successfully" },
