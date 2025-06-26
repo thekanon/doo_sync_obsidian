@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import React from "react";
-import DOMPurify, { type WindowLike } from "dompurify";
+import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
 import {
   parse,
@@ -44,7 +44,7 @@ function parseHtmlToReact(
     isDirectory: boolean;
   }>
 ): React.ReactNode {
-  const window = new JSDOM("").window as unknown as WindowLike;
+  const window = new JSDOM("").window;
   const purify = DOMPurify(window);
   const sanitizedHtml = purify.sanitize(html);
   const root = parse(sanitizedHtml);
