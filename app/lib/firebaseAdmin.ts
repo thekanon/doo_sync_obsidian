@@ -1,6 +1,7 @@
 import { getAuth, Auth } from "firebase-admin/auth";
 import { initializeApp, getApps, cert, App } from "firebase-admin/app";
 import { FirebaseError } from "firebase-admin";
+import { logger } from "@/app/lib/logger";
 let app: App | undefined;
 let auth: Auth | undefined;
 
@@ -54,7 +55,7 @@ export const initializeFirebaseAdmin = (): Auth => {
         databaseURL: "https://doowiki-874c3-default-rtdb.firebaseio.com",
       });
       auth = getAuth(app);
-      console.log("Firebase Admin SDK initialized successfully");
+      logger.debug("Firebase Admin SDK initialized successfully");
     } catch (error) {
       console.error("Failed to initialize Firebase Admin SDK:", error);
       throw error;

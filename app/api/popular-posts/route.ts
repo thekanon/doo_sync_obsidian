@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { createErrorResponse, createSuccessResponse, checkRateLimit } from '../../lib/api-utils';
+import { logger } from '@/app/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,14 +12,12 @@ export async function GET(request: NextRequest) {
       return createErrorResponse('Too many requests', 429);
     }
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log('GET /api/popular-posts called from:', request.url);
-    }
+    logger.debug('GET /api/popular-posts called from:', request.url);
     
     const repoPath = process.env.REPO_PATH || '';
     const popularPostsPath = path.join(repoPath, '/profile/Popular Posts.md');
 
-    console.log('Popular Posts Path:', popularPostsPath);
+    logger.debug('Popular Posts Path:', popularPostsPath);
     
     if (!repoPath || !fs.existsSync(popularPostsPath)) {
       return NextResponse.json({ error: 'Popular Posts file not found' }, { status: 404 });
@@ -78,7 +77,7 @@ export async function GET(request: NextRequest) {
         });
         
         if (process.env.NODE_ENV === 'development') {
-          console.log(`Added popular post: ${title} - ${category} - ${subcategory}`);
+          logger.debug(`Added popular post: ${title} - ${category} - ${subcategory}`);
         }
         
         // Skip the processed lines
@@ -87,7 +86,7 @@ export async function GET(request: NextRequest) {
     }
     
     if (process.env.NODE_ENV === 'development') {
-      console.log(`Total popular posts found: ${popularPosts.length}`);
+      logger.debug(`Total popular posts found: ${popularPosts.length}`);
     }
     
     return createSuccessResponse(popularPosts, {

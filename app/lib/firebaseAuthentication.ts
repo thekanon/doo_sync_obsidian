@@ -1,6 +1,7 @@
 // firebaseClient.ts
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
+import { logger } from "@/app/lib/logger";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -37,7 +38,7 @@ export async function handleAuthentication(
     }
 
     const data = await response.json();
-    console.log("서버 인증 성공");
+    logger.debug("서버 인증 성공");
 
     // 서버에서 받은 토큰을 로컬 스토리지에 저장
     localStorage.setItem("serverToken", data.token);
@@ -83,7 +84,7 @@ export const handleSignOut = async () => {
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
 
-      console.log("로그아웃 및 토큰 무효화 완료");
+      logger.debug("로그아웃 및 토큰 무효화 완료");
 
       // 선택적: 로그인 페이지로 리디렉션
       window.location.href = "/login";

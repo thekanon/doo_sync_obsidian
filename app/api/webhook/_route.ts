@@ -3,6 +3,7 @@ import fs from "fs/promises";
 import { NextApiRequest, NextApiResponse } from "next";
 import { execFile } from "child_process";
 import util from "util";
+import { logger } from "@/app/lib/logger";
 
 const execFileAsync = util.promisify(execFile);
 const OBSIDIAN_DIR = process.env.REPO_PATH+"/Root" as string;
@@ -24,10 +25,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     // Execute git pull
     const { stdout, stderr } = await execFileAsync('git', ['pull'], { cwd: OBSIDIAN_DIR });
     
-    console.log("Git pull output:", stdout);
+    logger.debug("Git pull output:", stdout);
     
     if (stderr) {
-      console.log("Git pull additional info:", stderr);
+      logger.debug("Git pull additional info:", stderr);
     }
 
     // Update last update time

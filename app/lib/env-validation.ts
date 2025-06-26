@@ -1,3 +1,4 @@
+import { logger } from '@/app/lib/logger';
 // Environment variable validation
 const requiredEnvVars = [
   'REPO_PATH',
@@ -35,9 +36,9 @@ export function validateEnvironment(): void {
 
   // Log environment status in development
   if (process.env.NODE_ENV === 'development') {
-    console.log('✅ Environment variables validated successfully');
-    console.log(`📁 REPO_PATH: ${process.env.REPO_PATH}`);
-    console.log(`🌐 API_URL: ${process.env.NEXT_PUBLIC_API_URL || 'not set'}`);
+    logger.debug('✅ Environment variables validated successfully');
+    logger.debug(`📁 REPO_PATH: ${process.env.REPO_PATH}`);
+    logger.debug(`🌐 API_URL: ${process.env.NEXT_PUBLIC_API_URL || 'not set'}`);
   }
 }
 

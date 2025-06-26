@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuth } from "firebase-admin/auth";
 import { initializeFirebaseAdmin } from "@/app/lib/firebaseAdmin";
+import { logger } from "@/app/lib/logger";
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
       ? new Date(tokensValidAfterTime).getTime() / 1000
       : null;
 
-    console.log(`토큰이 무효화된 시간: ${timestampSeconds}`);
+    logger.debug(`토큰이 무효화된 시간: ${timestampSeconds}`);
 
     return NextResponse.json(
       {

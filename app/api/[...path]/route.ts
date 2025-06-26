@@ -5,6 +5,7 @@ import { exec, ExecException } from "child_process";
 import { marked } from "marked";
 import { NextRequest, NextResponse } from "next/server";
 import { buildIndex } from "@/services/search/searchService";
+import { logger } from "@/app/lib/logger";
 
 // 커스텀 execAsync 함수 정의
 const execAsync = (
@@ -133,7 +134,7 @@ const readAndProcessFile = async (
   if (isIndexFile) {
     const dirPath = path.dirname(filePath);
     directoryFiles = await readDirectoryFiles(dirPath);
-    console.log("Directory files:", directoryFiles);
+    logger.debug("Directory files:", directoryFiles);
   }
 
   const processedContent = await processContent(content);
@@ -209,11 +210,11 @@ export async function POST(
       );
     }
 
-    console.log("Pulling latest changes from git repository");
+    logger.debug("Pulling latest changes from git repository");
     const event = request.headers.get("x-github-event");
-    console.log("Event:", event);
+    logger.debug("Event:", event);
     if (event !== "push") {
-      console.log("Webhook action is not push, skipping git pull");
+      logger.debug("Webhook action is not push, skipping git pull");
       return NextResponse.json(
         { content: "Webhook processed successfully" },
         { status: 200 }
@@ -227,8 +228,8 @@ export async function POST(
       }
     );
 
-    console.log("Git pull output:", stdout);
-    if (stderr) console.log("Git pull :", stderr);
+    logger.debug("Git pull output:", stdout);
+    if (stderr) logger.debug("Git pull :", stderr);
 
     if (exitCode !== 0) {
       console.error(`Git pull failed with exit code ${exitCode}`);

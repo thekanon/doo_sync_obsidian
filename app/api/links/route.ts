@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { logger } from '@/app/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
     // Log request info for debugging
-    console.log('GET /api/links called from:', request.url);
+    logger.debug('GET /api/links called from:', request.url);
     
     const repoPath = process.env.REPO_PATH || '';
     const linksPath = path.join(repoPath, '/profile/Link.md');

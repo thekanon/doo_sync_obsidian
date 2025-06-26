@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { getCurrentUser, hasPermission } from '../../lib/utils';
 import { UserRole } from '../../types/user';
+import { logger } from '@/app/lib/logger';
 
 interface DirectoryItem {
   name: string;
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const currentPath = searchParams.get('path') || '';
     
-    console.log('GET /api/current-directory called for path:', currentPath);
+    logger.debug('GET /api/current-directory called for path:', currentPath);
     
     const repoPath = process.env.REPO_PATH || '';
     const rootDir = path.join(repoPath, 'Root');
@@ -53,8 +54,8 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    console.log('Scanning directory:', directoryToScan);
-    console.log('Relative path:', relativePath);
+    logger.debug('Scanning directory:', directoryToScan);
+    logger.debug('Relative path:', relativePath);
     
     if (!fs.existsSync(directoryToScan)) {
       return NextResponse.json({ error: 'Directory not found' }, { status: 404 });
@@ -106,7 +107,7 @@ export async function GET(request: NextRequest) {
       return a.name.localeCompare(b.name);
     });
     
-    console.log(`Found ${items.length} items in current directory`);
+    logger.debug(`Found ${items.length} items in current directory`);
     
     return NextResponse.json({ 
       items,

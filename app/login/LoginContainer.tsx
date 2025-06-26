@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import firebase from "firebase/compat/app";
 import * as firebaseui from "firebaseui";
 import "firebase/compat/auth";
+import { logger } from "@/app/lib/logger";
 import {
   handleAuthentication,
   handleSignOut as firebaseSignOut,
@@ -49,17 +50,17 @@ const LoginPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    console.log("인증 상태 관찰자 설정 중!");
+    logger.debug("인증 상태 관찰자 설정 중!");
     const unregisterAuthObserver = firebase.auth().onAuthStateChanged(
       function (user) {
-        console.log("인증 상태 변경됨", user);
+        logger.debug("인증 상태 변경됨", user);
         setLoading(true);
         if (user) {
           // 사용자가 로그인함
           user
             .getIdToken()
             .then((accessToken) => {
-              console.log("사용자 토큰 획득", accessToken);
+              logger.debug("사용자 토큰 획득", accessToken);
               setUser(user);
               setLoading(false);
             })
@@ -70,7 +71,7 @@ const LoginPage = () => {
             });
         } else {
           // 사용자가 로그아웃함
-          console.log("사용자가 로그아웃함");
+          logger.debug("사용자가 로그아웃함");
           setUser(null);
           setLoading(false);
         }
@@ -87,7 +88,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (!user) {
-      console.log("FirebaseUI 초기화 중");
+      logger.debug("FirebaseUI 초기화 중");
 
       const ui =
         firebaseui.auth.AuthUI.getInstance() ||
@@ -97,10 +98,10 @@ const LoginPage = () => {
           // Called when the user has been successfully signed in.
           signInSuccessWithAuthResult: function (authResult) {
             if (authResult.user) {
-              console.log(authResult.user);
+              logger.debug(authResult.user);
             }
             if (authResult.additionalUserInfo) {
-              console.log(authResult.additionalUserInfo);
+              logger.debug(authResult.additionalUserInfo);
             }
             // Do not redirect.
             return false;
@@ -134,21 +135,21 @@ const LoginPage = () => {
     } else {
       getAuthInfo(user);
     }
-  }, [user]);
+  }, [user, getAuthInfo]);
 
-  const getAuthInfo = async (user: firebase.User) => {
+  const getAuthInfo = useCallback(async (user: firebase.User) => {
     try {
       // 로그인 성공 시 JWT 토큰을 서버에 쿠키로 저장하기 위한 핸들러
       const success = await handleAuthentication(user);
       if (success) {
-        // TODO: 사용자 권한에 따라 페이지 이동
+        router.push("/");
       } else {
         setError("인증에 실패했습니다.");
       }
     } catch (err) {
       setError("로그인 중 오류가 발생했습니다.");
     }
-  };
+  }, [router]);
 
   const handleSignOut = async () => {
     if (typeof window !== "undefined") {
@@ -167,7 +168,7 @@ const LoginPage = () => {
         .auth()
         .signOut()
         .then(() => {
-          console.log("사용자가 성공적으로 로그아웃함");
+          logger.debug("사용자가 성공적으로 로그아웃함");
         })
         .catch((error) => {
           console.error("로그아웃 오류", error);

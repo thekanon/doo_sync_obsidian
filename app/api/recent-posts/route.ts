@@ -6,6 +6,7 @@ import { hasPermission } from '../../lib/utils';
 import { UserRole } from '../../types/user';
 import { createErrorResponse, createSuccessResponse, checkRateLimit } from '../../lib/api-utils';
 import { getEnvVar } from '../../lib/env-validation';
+import { logger } from '@/app/lib/logger';
 
 interface FileInfo {
   name: string;
@@ -104,9 +105,7 @@ export async function GET(request: NextRequest) {
       return hasAccess;
     });
     
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`Found ${allowedFiles.length} allowed files out of ${recentFiles.length} total files for user role: ${userRole}`);
-    }
+    logger.debug(`Found ${allowedFiles.length} allowed files out of ${recentFiles.length} total files for user role: ${userRole}`);
     
     const recentPosts = allowedFiles.slice(0, 5).map(file => ({
       title: file.name,
