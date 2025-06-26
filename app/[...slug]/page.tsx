@@ -10,7 +10,6 @@ import {
 } from "node-html-parser";
 import { getHost, getServerUser, hasPermission } from "@/app/lib/utils";
 import { UserRole } from "../types/user";
-import MainSlider from "../components/MainSlider";
 
 type Params = {
   slug: string[];
@@ -180,7 +179,7 @@ function parseHtmlToReact(
           });
         }
 
-        return React.createElement("p", { key: node.rawText }, [
+        return React.createElement("div", { key: node.rawText }, [
           ...directories,
           ...files,
         ]);
@@ -238,13 +237,51 @@ function CustomContent({
     [content, path, role, updatedAt, createdAt, directoryFiles]
   );
 
-  // Check if this is the root index page to show featured slider
-  const isRootIndex = path === "_Index_of_Root.md";
+  // Extract file title from path for display (only for files, not directories)
+  const getFileTitle = (pathString: string) => {
+    // Skip if this is a directory index file
+    if (pathString.includes("_Index_of_")) {
+      return null;
+    }
+
+    // Extract filename and clean it up
+    const pathParts = pathString.split("/");
+    const fileName = pathParts[pathParts.length - 1];
+
+    // Remove .md extension and decode URI components
+    const title = decodeURIComponent(fileName)
+      .replace(/\.md$/, "")
+      .replace(/^\d+\.\s*/, ""); // Remove number prefixes like "4. "
+
+    return title;
+  };
+
+  const fileTitle = getFileTitle(path);
 
   return (
-    <div className="w-full">
-      {isRootIndex && <MainSlider />}
-      <div className="prose prose-lg max-w-none">
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="prose prose-lg max-w-full overflow-x-hidden break-words overflow-y-hidden">
+        {/* Display file title at the top (only for files, not directories) */}
+        {fileTitle && (
+          <div className="mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-gray-200 max-w-full overflow-hidden">
+            <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 break-words">
+              {fileTitle}
+            </h1>
+            <div className="flex flex-col sm:flex-row sm:items-center text-sm sm:text-base text-gray-500 space-y-1 sm:space-y-0 sm:space-x-4">
+              {updatedAt && (
+                <span className="break-all">
+                  📅 Updated: {new Date(updatedAt).toLocaleDateString()}
+                </span>
+              )}
+              {createdAt && (
+                <span className="break-all">
+                  📝 Created: {new Date(createdAt).toLocaleDateString()}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
         {React.Children.map(parsedContent, (child, index) => {
           if (
             React.isValidElement<{ className?: string }>(child) &&
