@@ -117,7 +117,7 @@ export default function RightSidebar() {
                   href={comment.postPath}
                   className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                 >
-                  on "{comment.postTitle}"
+                  on &quot;{comment.postTitle}&quot;
                 </Link>
               </div>
             ))}

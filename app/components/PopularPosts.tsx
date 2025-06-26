@@ -2,14 +2,6 @@
 import { useState } from "react";
 import Link from "next/link";
 
-interface PopularPost {
-  title: string;
-  path: string;
-  views: number;
-  date: string;
-  category: string;
-  excerpt: string;
-}
 
 const popularPostsData = {
   daily: [
