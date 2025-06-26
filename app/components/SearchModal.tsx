@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
+import { debounce } from "es-toolkit";
 import Link from "next/link";
 
 interface SearchResult {
@@ -24,14 +25,10 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
     }
   }, [open]);
 
-  useEffect(() => {
-    const fetchResults = async () => {
-      if (!query.trim()) {
-        setResults([]);
-        return;
-      }
+  const fetchRef = useRef(
+    debounce(async (q: string) => {
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
         if (res.ok) {
           const data = await res.json();
           setResults(Array.isArray(data.results) ? data.results : []);
@@ -39,9 +36,19 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
       } catch (err) {
         console.error("Search error", err);
       }
-    };
+    }, 300)
+  );
 
-    fetchResults();
+  useEffect(() => {
+    const debounced = fetchRef.current;
+    const trimmed = query.trim();
+    if (trimmed.length < 2) {
+      debounced.cancel();
+      setResults([]);
+      return;
+    }
+    debounced(trimmed);
+    return () => debounced.cancel();
   }, [query]);
 
   if (!open) return null;
