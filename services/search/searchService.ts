@@ -1,5 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
+import { hasPermission } from "@/app/lib/utils";
+import { UserRole } from "@/app/types/user";
 
 interface IndexEntry {
   path: string;
@@ -18,7 +20,9 @@ async function walk(dir: string) {
     } else if (entry.isFile() && entry.name.endsWith(".md")) {
       const content = await fs.readFile(fullPath, "utf8");
       const titleMatch = content.match(/^#\s+(.*)/m);
-      const title = titleMatch ? titleMatch[1].trim() : entry.name.replace(/\.md$/, "");
+      const title = titleMatch
+        ? titleMatch[1].trim()
+        : entry.name.replace(/\.md$/, "");
       index.push({ path: fullPath, title, content });
     }
   }
@@ -29,10 +33,17 @@ export async function buildIndex(baseDir: string): Promise<void> {
   await walk(baseDir);
 }
 
-export function search(query: string): Array<{ path: string; title: string; snippet: string }> {
+export function search(
+  query: string,
+  userRole?: UserRole
+): Array<{ path: string; title: string; snippet: string }> {
   const lower = query.toLowerCase();
   return index
-    .filter((doc) => doc.content.toLowerCase().includes(lower) || doc.title.toLowerCase().includes(lower))
+    .filter(
+      (doc) =>
+        doc.content.toLowerCase().includes(lower) ||
+        doc.title.toLowerCase().includes(lower)
+    )
     .map((doc) => {
       const pos = doc.content.toLowerCase().indexOf(lower);
       let snippet = "";
@@ -43,5 +54,6 @@ export function search(query: string): Array<{ path: string; title: string; snip
       }
       const relative = doc.path.split("Root")[1].replace(/^\//, "");
       return { path: `/${relative}`, title: doc.title, snippet };
-    });
+    })
+    .filter((result) => hasPermission(userRole, result.path));
 }

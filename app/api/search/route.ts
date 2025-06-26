@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildIndex, search } from "@/services/search/searchService";
+import { getCurrentUser } from "@/app/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -24,11 +25,15 @@ export async function GET(req: NextRequest) {
     }
 
     await ensureIndex();
-    const results = search(query);
+    const user = await getCurrentUser(req);
+    const results = search(query, user?.role);
 
     return NextResponse.json({ results });
   } catch (error) {
     console.error("Search error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
