@@ -1,9 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { getCurrentUser } from '../../lib/utils';
 import { hasPermission } from '../../lib/utils';
 import { UserRole } from '../../types/user';
+import { createErrorResponse, createSuccessResponse, checkRateLimit } from '../../lib/api-utils';
+import { getEnvVar } from '../../lib/env-validation';
 
 interface FileInfo {
   name: string;
@@ -74,12 +76,18 @@ function isPrivateFolder(path: string): boolean {
 
 export async function GET(request: NextRequest) {
   try {
-    const repoPath = process.env.REPO_PATH || '';
+    // Rate limiting
+    const clientIp = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+    if (!checkRateLimit(clientIp, 50, 60000)) {
+      return createErrorResponse('Too many requests', 429);
+    }
+
+    const repoPath = getEnvVar('REPO_PATH');
     // Ensure we only scan within the Root directory for security
     const rootDir = path.join(repoPath, 'Root');
     
-    if (!repoPath || !fs.existsSync(rootDir)) {
-      return NextResponse.json({ error: 'Root directory not found' }, { status: 404 });
+    if (!fs.existsSync(rootDir)) {
+      return createErrorResponse('Root directory not found', 404);
     }
 
     // Get current user to check permissions
@@ -96,7 +104,9 @@ export async function GET(request: NextRequest) {
       return hasAccess;
     });
     
-    console.log(`Found ${allowedFiles.length} allowed files out of ${recentFiles.length} total files for user role: ${userRole}`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Found ${allowedFiles.length} allowed files out of ${recentFiles.length} total files for user role: ${userRole}`);
+    }
     
     const recentPosts = allowedFiles.slice(0, 5).map(file => ({
       title: file.name,
@@ -105,9 +115,10 @@ export async function GET(request: NextRequest) {
       date: file.modifiedAt.toISOString().split('T')[0] // Format as YYYY-MM-DD
     }));
     
-    return NextResponse.json({ recentPosts });
+    return createSuccessResponse(recentPosts, {
+      total: recentPosts.length
+    }, 300); // Cache for 5 minutes
   } catch (error) {
-    console.error('Error getting recent posts:', error);
-    return NextResponse.json({ error: 'Failed to get recent posts' }, { status: 500 });
+    return createErrorResponse(error, 500, 'Failed to get recent posts');
   }
 }

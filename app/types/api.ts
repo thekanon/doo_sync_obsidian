@@ -29,3 +29,32 @@ export interface FileInfo {
   category: string;
   isDirectory?: boolean;
 }
+
+// API specific response types
+export interface RecentPost {
+  title: string;
+  path: string;
+  category: string;
+  date: string;
+}
+
+export interface PopularPost {
+  title: string;
+  path: string;
+  category: string;
+  subcategory?: string;
+  views?: number;
+}
+
+export interface LinkItem {
+  title: string;
+  url: string;
+  description?: string;
+}
+
+export interface DirectoryItem {
+  name: string;
+  path: string;
+  isDirectory: boolean;
+  modifiedAt?: string;
+}

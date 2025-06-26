@@ -1,37 +1,26 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { ApiResponse, RecentPost, PopularPost, LinkItem } from "../types/api";
 
-interface RecentPost {
-  title: string;
-  path: string;
-  category: string;
-  date: string;
-}
+// Remove duplicate interfaces - using imported types
 
-interface PopularPost {
-  title: string;
-  path: string;
-  category: string;
-  subcategory?: string;
-  views?: number;
-}
-
-interface LinkItem {
-  title: string;
-  url: string;
-  description?: string;
-}
-
-// API fetch functions
+// API fetch functions with proper error handling
 const fetchRecentPosts = async (): Promise<RecentPost[]> => {
   try {
     const response = await fetch('/api/recent-posts');
     if (!response.ok) throw new Error('Failed to fetch recent posts');
-    const data = await response.json();
-    return data.recentPosts || [];
+    const apiResponse: ApiResponse<RecentPost[]> = await response.json();
+    
+    if (!apiResponse.success) {
+      throw new Error(apiResponse.error || 'API request failed');
+    }
+    
+    return apiResponse.data || [];
   } catch (error) {
-    console.error('Error fetching recent posts:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error fetching recent posts:', error);
+    }
     return [];
   }
 };

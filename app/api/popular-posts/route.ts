@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { createErrorResponse, createSuccessResponse, checkRateLimit } from '../../lib/api-utils';
 
 export async function GET(request: NextRequest) {
   try {
-    // Log request info for debugging
-    console.log('GET /api/popular-posts called from:', request.url);
+    // Rate limiting
+    const clientIp = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+    if (!checkRateLimit(clientIp, 50, 60000)) {
+      return createErrorResponse('Too many requests', 429);
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('GET /api/popular-posts called from:', request.url);
+    }
     
     const repoPath = process.env.REPO_PATH || '';
     const popularPostsPath = path.join(repoPath, '/profile/Popular Posts.md');
@@ -69,18 +77,23 @@ export async function GET(request: NextRequest) {
           subcategory
         });
         
-        console.log(`Added popular post: ${title} - ${category} - ${subcategory}`);
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Added popular post: ${title} - ${category} - ${subcategory}`);
+        }
         
         // Skip the processed lines
         i += skipCount;
       }
     }
     
-    console.log(`Total popular posts found: ${popularPosts.length}`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Total popular posts found: ${popularPosts.length}`);
+    }
     
-    return NextResponse.json({ popularPosts });
+    return createSuccessResponse(popularPosts, {
+      total: popularPosts.length
+    }, 300); // Cache for 5 minutes
   } catch (error) {
-    console.error('Error reading popular posts:', error);
-    return NextResponse.json({ error: 'Failed to read popular posts' }, { status: 500 });
+    return createErrorResponse(error, 500, 'Failed to read popular posts');
   }
 }
