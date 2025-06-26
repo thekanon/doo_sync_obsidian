@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import React from "react";
-import DOMPurify from "dompurify";
+import DOMPurify, { type WindowLike } from "dompurify";
 import { JSDOM } from "jsdom";
 import {
   parse,
@@ -27,8 +27,8 @@ type ObsidianData = {
   }>;
 };
 
-const FileLink = dynamic(() => import('@/app/components/FileLink'), {
-  ssr: true
+const FileLink = dynamic(() => import("@/app/components/FileLink"), {
+  ssr: true,
 });
 
 function parseHtmlToReact(
@@ -44,8 +44,8 @@ function parseHtmlToReact(
     isDirectory: boolean;
   }>
 ): React.ReactNode {
-  const window = new JSDOM("").window;
-  const purify = DOMPurify(window as unknown as Window);
+  const window = new JSDOM("").window as unknown as WindowLike;
+  const purify = DOMPurify(window);
   const sanitizedHtml = purify.sanitize(html);
   const root = parse(sanitizedHtml);
 
