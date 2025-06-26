@@ -10,6 +10,7 @@ import {
 } from "node-html-parser";
 import { getHost, getServerUser, hasPermission } from "@/app/lib/utils";
 import { UserRole } from "../types/user";
+import MainSlider from "../components/MainSlider";
 
 type Params = {
   slug: string[];
@@ -237,21 +238,27 @@ function CustomContent({
     [content, path, role, updatedAt, createdAt, directoryFiles]
   );
 
+  // Check if this is the root index page to show featured slider
+  const isRootIndex = path === "_Index_of_Root.md";
+
   return (
-    <div className="w-full sm:min-w-[600px] md:min-w-[800px] lg:min-w-[1000px] xl:min-w-[1200px] 2xl:min-w-[1400px]">
-      {React.Children.map(parsedContent, (child, index) => {
-        if (
-          React.isValidElement<{ className?: string }>(child) &&
-          typeof child.type === "string" &&
-          child.type === "p" &&
-          index === 0
-        ) {
-          return React.cloneElement(child, {
-            className: `${child.props.className || ""} mt-0`.trim(),
-          });
-        }
-        return child;
-      })}
+    <div className="w-full">
+      {isRootIndex && <MainSlider />}
+      <div className="prose prose-lg max-w-none">
+        {React.Children.map(parsedContent, (child, index) => {
+          if (
+            React.isValidElement<{ className?: string }>(child) &&
+            typeof child.type === "string" &&
+            child.type === "p" &&
+            index === 0
+          ) {
+            return React.cloneElement(child, {
+              className: `${child.props.className || ""} mt-0`.trim(),
+            });
+          }
+          return child;
+        })}
+      </div>
     </div>
   );
 }
@@ -275,17 +282,15 @@ export default async function Page({ params }: { params: Params }) {
     const user = await getServerUser();
 
     return (
-      <div>
-        <div className="prose prose-sm p-3 pt-0 flex flex-col items-center flex-grow flex-shrink-0 w-full max-w-full">
-          <CustomContent
-            content={data.content}
-            path={path}
-            role={user?.role}
-            updatedAt={data.updatedAt}
-            createdAt={data.createdAt}
-            directoryFiles={data.directoryFiles}
-          />
-        </div>
+      <div className="w-full">
+        <CustomContent
+          content={data.content}
+          path={path}
+          role={user?.role}
+          updatedAt={data.updatedAt}
+          createdAt={data.createdAt}
+          directoryFiles={data.directoryFiles}
+        />
       </div>
     );
   } catch (error: unknown) {
