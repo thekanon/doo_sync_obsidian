@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { User, UserRole } from "../types/user";
 import { fetchAuthInfo } from "@/services/auth/authService";
+import { logger } from "./logger";
 
 // server host
 export const getHost = () => {
@@ -29,8 +30,8 @@ export const hasPermission = (
     return regexPattern.test(decodedPath);
   });
 
-  console.log("🔒 permission", permission);
-  console.log("🔒 path", decodedPath);
+  logger.debug("🔒 permission", permission);
+  logger.debug("🔒 path", decodedPath);
 
   if (!permission) return true; // 정의되지 않은 경로는 기본적으로 접근 허용
   return (
@@ -51,9 +52,9 @@ export const isPublicPage = (path: string): boolean => {
 
     return regexPattern.test(decodedPath);
   });
-  console.log("🔒 decodedPath", decodedPath);
-  console.log("🔒 permissionpermission", permission);
-  console.log("🔒 permission?.isPublic", permission?.isPublic ?? false);
+  logger.debug("🔒 decodedPath", decodedPath);
+  logger.debug("🔒 permissionpermission", permission);
+  logger.debug("🔒 permission?.isPublic", permission?.isPublic ?? false);
 
   if (!permission) return false; // 정의되지 않은 경로는 기본적으로 공개 페이지
 
@@ -85,7 +86,7 @@ export const getCurrentUser = async (
     } else {
       throw new Error("User not found");
     }
-    console.log("⭐️ user", user);
+    logger.debug("⭐️ user", user);
     return user;
   } catch (error) {
     console.error("Error getting current user:", error);
@@ -98,7 +99,7 @@ export async function getServerUser(): Promise<User | null> {
   try {
     const headersList = headers();
     const user = headersList.get("x-user-info");
-    console.log("🔒 user", user);
+    logger.debug("🔒 user", user);
     if (!user) return null;
     return JSON.parse(user) as User;
   } catch (error) {
@@ -112,7 +113,7 @@ const VISIT_COUNT_COOKIE = "visitCount";
 
 export const getVisitCount = async (request: NextRequest): Promise<number> => {
   const visitCount = request.cookies.get(VISIT_COUNT_COOKIE)?.value;
-  console.log("💡 visitCount", visitCount);
+  logger.debug("💡 visitCount", visitCount);
   const count = parseInt(visitCount || "0", 10);
   return count;
 };
@@ -135,7 +136,7 @@ export const incrementVisitCount = async (
     sameSite: "lax",
   });
 
-  console.log("Visit count incremented:", newCount);
+  logger.debug("Visit count incremented:", newCount);
   return response;
 };
 
@@ -180,6 +181,6 @@ export const resetVisitCount = async (
     httpOnly: true,
     sameSite: "lax",
   });
-  console.log("Visit count reset");
+  logger.debug("Visit count reset");
   return response;
 };
