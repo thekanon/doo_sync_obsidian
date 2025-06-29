@@ -60,7 +60,6 @@ export function validateEnvironment(): void {
       console.warn('Could not import path module');
     });
   }
-  }
 
   // Log environment status in development
   if (process.env.NODE_ENV === 'development') {
