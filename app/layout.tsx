@@ -3,20 +3,24 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
+const siteName = process.env.SITE_NAME || "DooWiki";
+const siteUrl = process.env.SITE_URL || "https://doowiki.site";
+const siteAuthor = process.env.SITE_AUTHOR || "DooDeveloper";
+
 export const metadata: Metadata = {
   title: {
-    default: "DooWiki",
-    template: "%s | DooWiki",
+    default: siteName,
+    template: `%s | ${siteName}`,
   },
-  description: "DooWiki - Dooveloper Wiki",
+  description: `${siteName} - ${siteAuthor} Wiki`,
   keywords: ["DooWiki", "Dooveloper", "Wiki", "Frontend", "React", "Next.js"],
-  authors: [{ name: "DooDeveloper", url: "https://doowiki.site" }],
+  authors: [{ name: siteAuthor, url: siteUrl }],
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://doowiki.site",
-    title: "DooWiki - Dooveloper Wiki",
-    description: "DooWiki - Dooveloper Wiki",
+    url: siteUrl,
+    title: `${siteName} - ${siteAuthor} Wiki`,
+    description: `${siteName} - ${siteAuthor} Wiki`,
     images: ["/og-image.png"],
   },
 };
