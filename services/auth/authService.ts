@@ -1,4 +1,5 @@
 import { User } from "@/app/types/user";
+import { logger } from "@/app/lib/logger";
 
 const getBaseUrl = () => {
   if (typeof window !== 'undefined') {
@@ -29,8 +30,6 @@ export async function fetchAuthInfo(token?: string): Promise<User> {
   }
 
   const data = await response.json();
-  if (process.env.NODE_ENV === 'development') {
-    console.log("Auth data:", data);
-  }
+  logger.debug("Auth data:", data);
   return data.user as User;
 }

@@ -104,7 +104,6 @@ export async function GET(request: NextRequest) {
       return a.name.localeCompare(b.name);
     });
     
-    
     return NextResponse.json({ 
       items,
       currentPath: relativePath || rootDirName,

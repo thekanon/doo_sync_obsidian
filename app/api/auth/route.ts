@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Auth } from "firebase-admin/auth";
 import { serialize } from "cookie";
 import { initializeFirebaseAdmin } from "@/app/lib/firebaseAdmin";
+import { logger } from "@/app/lib/logger";
 
 let auth: Auth | undefined;
 
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
     }
 
     const token = authHeader.split("Bearer ")[1];
-    console.log("Received token:", token);
+    logger.debug("Received token:", token);
 
     if (!token) {
       return NextResponse.json(
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
 
     try {
       const decodedToken = await auth.verifyIdToken(token);
-      console.log("Token decoded successfully:", decodedToken);
+      logger.debug("Token decoded successfully:", decodedToken);
       const uid = decodedToken.uid;
 
       if (!auth) {
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest) {
       }
 
       const userRecord = await auth.getUser(uid);
-      console.log("User info:", userRecord);
+      logger.debug("User info:", userRecord);
 
       const userInfo = {
         uid: userRecord.uid,
