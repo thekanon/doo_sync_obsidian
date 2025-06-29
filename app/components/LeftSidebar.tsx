@@ -29,10 +29,17 @@ const fetchPopularPosts = async (): Promise<PopularPost[]> => {
   try {
     const response = await fetch('/api/popular-posts');
     if (!response.ok) throw new Error('Failed to fetch popular posts');
-    const data = await response.json();
-    return data.popularPosts || [];
+    const apiResponse: ApiResponse<PopularPost[]> = await response.json();
+    
+    if (!apiResponse.success) {
+      throw new Error(apiResponse.error || 'API request failed');
+    }
+    
+    return apiResponse.data || [];
   } catch (error) {
-    console.error('Error fetching popular posts:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error fetching popular posts:', error);
+    }
     return [];
   }
 };
@@ -41,10 +48,17 @@ const fetchLinks = async (): Promise<LinkItem[]> => {
   try {
     const response = await fetch('/api/links');
     if (!response.ok) throw new Error('Failed to fetch links');
-    const data = await response.json();
-    return data.links || [];
+    const apiResponse: ApiResponse<LinkItem[]> = await response.json();
+    
+    if (!apiResponse.success) {
+      throw new Error(apiResponse.error || 'API request failed');
+    }
+    
+    return apiResponse.data || [];
   } catch (error) {
-    console.error('Error fetching links:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error fetching links:', error);
+    }
     return [];
   }
 };
