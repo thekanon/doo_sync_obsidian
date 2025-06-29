@@ -25,6 +25,40 @@
    ```
    기본 포트는 `33000`입니다.
 
+## Firebase 설정
+
+이 프로젝트는 Firebase Authentication을 사용합니다. 배포하기 전에 다음 단계를 완료해야 합니다:
+
+### 1. Firebase 프로젝트 생성
+1. [Firebase Console](https://console.firebase.google.com/)에서 새 프로젝트를 생성하세요.
+2. Authentication을 활성화하고 필요한 로그인 방법(Google, 이메일/비밀번호 등)을 설정하세요.
+3. 프로젝트 설정에서 웹 앱을 추가하고 Firebase 구성 정보를 얻으세요.
+
+### 2. Firebase 구성 파일 설정
+1. `.firebaserc` 파일에서 `"your-firebase-project-id"`를 실제 Firebase 프로젝트 ID로 변경하세요:
+   ```json
+   {
+     "projects": {
+       "default": "실제-프로젝트-id"
+     }
+   }
+   ```
+
+2. `.env` 파일에 Firebase 구성 정보를 추가하세요:
+   ```bash
+   NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+   NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+   ```
+
+### 3. Firebase Admin SDK 설정 (선택사항)
+서버 사이드 Firebase 기능을 사용하려면 Firebase Admin SDK를 설정하세요:
+1. Firebase Console에서 서비스 계정 키를 생성하세요.
+2. 환경 변수에 서비스 계정 정보를 추가하세요.
+
 ## 배포
 
 아래 명령으로 프로덕션 서버를 빌드하고 실행합니다.
@@ -74,3 +108,7 @@ OBSIDIAN_URL=personal-notes
 - 클라이언트 측에서 서버의 vault 정보 접근
 - 다중 인스턴스 환경에서의 요청 라우팅
 - 디버깅 및 모니터링 목적
+
+## 📄 라이선스
+
+이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 [LICENSE](../LICENSE) 파일을 참조하세요.
