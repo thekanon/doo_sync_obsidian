@@ -4,7 +4,8 @@ import { getCurrentUser } from "@/app/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-const OBSIDIAN_DIR = (process.env.REPO_PATH + "/Root") as string;
+const ROOT_DIR = process.env.OBSIDIAN_ROOT_DIR || 'Root';
+const OBSIDIAN_DIR = (process.env.REPO_PATH + `/${ROOT_DIR}`) as string;
 
 let initialized = false;
 

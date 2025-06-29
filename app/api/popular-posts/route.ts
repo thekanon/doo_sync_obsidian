@@ -39,8 +39,9 @@ export async function GET(request: NextRequest) {
         let path = linkMatch[2];
         
         // Remove "Root/" prefix if present
-        if (path.startsWith('Root/')) {
-          path = path.substring(5);
+        const rootDirName = process.env.OBSIDIAN_ROOT_DIR || 'Root';
+        if (path.startsWith(`${rootDirName}/`)) {
+          path = path.substring(rootDirName.length + 1);
         }
         
         // Add leading slash if not present

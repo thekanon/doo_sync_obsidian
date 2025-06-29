@@ -22,7 +22,7 @@ export const hasPermission = (
   
   // Remove common prefixes that might interfere with pattern matching
   const cleanPath = decodedPath
-    .replace(/^\/Root\//, '/') // Remove /Root/ prefix
+    .replace(new RegExp(`^/${process.env.OBSIDIAN_ROOT_DIR || 'Root'}/`), '/') // Remove /Root/ prefix
     .replace(/\/_Index_of_/, '/') // Normalize index paths
     .replace(/\.md$/, ''); // Remove .md extension
 

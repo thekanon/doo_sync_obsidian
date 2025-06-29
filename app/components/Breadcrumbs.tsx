@@ -17,9 +17,10 @@ export default function Breadcrumbs() {
 
   const isIndexFile = last?.startsWith('_Index_of_')
 
+  const ROOT_DIR = process.env.OBSIDIAN_ROOT_DIR || 'Root'
   if (isIndexFile) {
     // 루트 인덱스라면 브래드크럼을 표시하지 않음
-    if (last === '_Index_of_Root.md') {
+    if (last === `_Index_of_${ROOT_DIR}.md`) {
       return null
     }
     // 인덱스 파일 세그먼트 제거

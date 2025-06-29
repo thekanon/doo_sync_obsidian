@@ -185,7 +185,8 @@ function handleParagraphElement(
     }> => React.isValidElement(child) && !!child.props["data-href"]
   );
 
-  const isRoot = path === "_Index_of_Root.md";
+  const ROOT_DIR = process.env.OBSIDIAN_ROOT_DIR || 'Root';
+  const isRoot = path === `_Index_of_${ROOT_DIR}.md`;
 
   let directories = links.filter((link) => link.props["data-is-directory"] === "true");
   let files = links.filter((link) => link.props["data-is-directory"] === "false");

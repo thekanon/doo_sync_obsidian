@@ -1,12 +1,14 @@
+const ROOT_DIR_NAME = process.env.OBSIDIAN_ROOT_DIR || 'Root';
+
 export function getCurrentLocationInfo(pathname: string | null) {
-  if (!pathname) return { type: "directory", name: "Root", parentPath: "" };
+  if (!pathname) return { type: "directory", name: ROOT_DIR_NAME, parentPath: "" };
 
   const currentPath = decodeURIComponent(
     pathname.startsWith("/") ? pathname.slice(1) : pathname
   );
 
-  if (!currentPath || currentPath === "_Index_of_Root.md") {
-    return { type: "directory", name: "Root", parentPath: "" };
+  if (!currentPath || currentPath === `_Index_of_${ROOT_DIR_NAME}.md`) {
+    return { type: "directory", name: ROOT_DIR_NAME, parentPath: "" };
   }
 
   // Extract information from path
@@ -41,7 +43,7 @@ export function getBreadcrumbs(pathname: string | null) {
   const currentPath = decodeURIComponent(pathname.startsWith('/') ? pathname.slice(1) : pathname);
   
   // If we're at root, return empty breadcrumbs
-  if (!currentPath || currentPath === '_Index_of_Root.md') {
+  if (!currentPath || currentPath === `_Index_of_${ROOT_DIR_NAME}.md`) {
     return [];
   }
   
@@ -49,8 +51,8 @@ export function getBreadcrumbs(pathname: string | null) {
   
   // Always add root link
   breadcrumbs.push({
-    name: "🏠 Root",
-    path: "/_Index_of_Root.md"
+    name: `🏠 ${ROOT_DIR_NAME}`,
+    path: `/_Index_of_${ROOT_DIR_NAME}.md`
   });
   
   // Parse the current path to build breadcrumbs

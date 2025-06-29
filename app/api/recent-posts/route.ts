@@ -83,8 +83,9 @@ export async function GET(request: NextRequest) {
     }
 
     const repoPath = getEnvVar('REPO_PATH');
-    // Ensure we only scan within the Root directory for security
-    const rootDir = path.join(repoPath, 'Root');
+    const rootDirName = process.env.OBSIDIAN_ROOT_DIR || 'Root';
+    // Ensure we only scan within the root directory for security
+    const rootDir = path.join(repoPath, rootDirName);
     
     if (!fs.existsSync(rootDir)) {
       return createErrorResponse('Root directory not found', 404);
