@@ -9,6 +9,7 @@ interface DirectoryItem {
   path: string;
   isDirectory: boolean;
   modifiedAt: string;
+  isLocked?: boolean;
 }
 
 export async function GET(request: NextRequest) {
@@ -16,8 +17,6 @@ export async function GET(request: NextRequest) {
     // Get the current path from query parameters
     const { searchParams } = new URL(request.url);
     const currentPath = searchParams.get('path') || '';
-    
-    console.log('GET /api/current-directory called for path:', currentPath);
     
     const repoPath = process.env.REPO_PATH || '';
     const rootDir = path.join(repoPath, 'Root');
@@ -53,9 +52,6 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    console.log('Scanning directory:', directoryToScan);
-    console.log('Relative path:', relativePath);
-    
     if (!fs.existsSync(directoryToScan)) {
       return NextResponse.json({ error: 'Directory not found' }, { status: 404 });
     }
@@ -72,10 +68,9 @@ export async function GET(request: NextRequest) {
       const itemRelativePath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
       const itemPathForPermission = `/${itemRelativePath}`;
       
-      // Check permissions
-      if (!hasPermission(userRole, itemPathForPermission)) {
-        continue;
-      }
+      // Check permissions - now include locked items instead of filtering them out
+      const hasAccess = hasPermission(userRole, itemPathForPermission);
+      
       
       // Get file stats
       const stats = await fs.promises.stat(fullPath);
@@ -87,14 +82,16 @@ export async function GET(request: NextRequest) {
           name: entry.name,
           path: indexPath,
           isDirectory: true,
-          modifiedAt: stats.mtime.toISOString()
+          modifiedAt: stats.mtime.toISOString(),
+          isLocked: !hasAccess
         });
       } else if (entry.name.endsWith('.md')) {
         items.push({
           name: entry.name.replace('.md', ''),
           path: itemPathForPermission,
           isDirectory: false,
-          modifiedAt: stats.mtime.toISOString()
+          modifiedAt: stats.mtime.toISOString(),
+          isLocked: !hasAccess
         });
       }
     }
@@ -106,7 +103,6 @@ export async function GET(request: NextRequest) {
       return a.name.localeCompare(b.name);
     });
     
-    console.log(`Found ${items.length} items in current directory`);
     
     return NextResponse.json({ 
       items,
