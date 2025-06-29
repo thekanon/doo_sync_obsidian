@@ -10,6 +10,7 @@ interface DirectoryItem {
   path: string;
   isDirectory: boolean;
   modifiedAt: string;
+  isLocked?: boolean;
 }
 
 export async function GET(request: NextRequest) {
@@ -18,10 +19,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const currentPath = searchParams.get('path') || '';
     
-    logger.debug('GET /api/current-directory called for path:', currentPath);
-    
     const repoPath = process.env.REPO_PATH || '';
-    const rootDir = path.join(repoPath, 'Root');
+    const rootDirName = process.env.OBSIDIAN_ROOT_DIR || 'Root';
+    const rootDir = path.join(repoPath, rootDirName);
     
     if (!repoPath || !fs.existsSync(rootDir)) {
       return NextResponse.json({ error: 'Root directory not found' }, { status: 404 });
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     let directoryToScan = rootDir;
     let relativePath = '';
     
-    if (currentPath && currentPath !== '/' && currentPath !== '_Index_of_Root.md') {
+    if (currentPath && currentPath !== '/' && currentPath !== `_Index_of_${rootDirName}.md`) {
       // Clean the path - remove leading slash and decode URL
       const cleanPath = decodeURIComponent(currentPath.startsWith('/') ? currentPath.slice(1) : currentPath);
       
@@ -54,9 +54,6 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    logger.debug('Scanning directory:', directoryToScan);
-    logger.debug('Relative path:', relativePath);
-    
     if (!fs.existsSync(directoryToScan)) {
       return NextResponse.json({ error: 'Directory not found' }, { status: 404 });
     }
@@ -73,10 +70,9 @@ export async function GET(request: NextRequest) {
       const itemRelativePath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
       const itemPathForPermission = `/${itemRelativePath}`;
       
-      // Check permissions
-      if (!hasPermission(userRole, itemPathForPermission)) {
-        continue;
-      }
+      // Check permissions - now include locked items instead of filtering them out
+      const hasAccess = hasPermission(userRole, itemPathForPermission);
+      
       
       // Get file stats
       const stats = await fs.promises.stat(fullPath);
@@ -88,14 +84,16 @@ export async function GET(request: NextRequest) {
           name: entry.name,
           path: indexPath,
           isDirectory: true,
-          modifiedAt: stats.mtime.toISOString()
+          modifiedAt: stats.mtime.toISOString(),
+          isLocked: !hasAccess
         });
       } else if (entry.name.endsWith('.md')) {
         items.push({
           name: entry.name.replace('.md', ''),
           path: itemPathForPermission,
           isDirectory: false,
-          modifiedAt: stats.mtime.toISOString()
+          modifiedAt: stats.mtime.toISOString(),
+          isLocked: !hasAccess
         });
       }
     }
@@ -107,11 +105,9 @@ export async function GET(request: NextRequest) {
       return a.name.localeCompare(b.name);
     });
     
-    logger.debug(`Found ${items.length} items in current directory`);
-    
     return NextResponse.json({ 
       items,
-      currentPath: relativePath || 'Root',
+      currentPath: relativePath || rootDirName,
       totalCount: items.length
     });
   } catch (error) {

@@ -2,6 +2,7 @@ import { logger } from '@/app/lib/logger';
 // Environment variable validation
 const requiredEnvVars = [
   'REPO_PATH',
+  'OBSIDIAN_ROOT_DIR',
 ] as const;
 
 // Optional env vars for future use
@@ -34,11 +35,20 @@ export function validateEnvironment(): void {
     });
   }
 
+  const rootDir = process.env.OBSIDIAN_ROOT_DIR || 'Root';
+  if (repoPath) {
+    const fullRootPath = require('path').join(repoPath, rootDir);
+    import('fs').then(fs => {
+      if (!fs.existsSync(fullRootPath)) {
+        console.warn(`Warning: OBSIDIAN_ROOT_DIR does not exist: ${fullRootPath}`);
+      }
+    }).catch(() => {
+      console.warn('Could not validate OBSIDIAN_ROOT_DIR existence');
+    });
+  }
+
   // Log environment status in development
   if (process.env.NODE_ENV === 'development') {
-    logger.debug('✅ Environment variables validated successfully');
-    logger.debug(`📁 REPO_PATH: ${process.env.REPO_PATH}`);
-    logger.debug(`🌐 API_URL: ${process.env.NEXT_PUBLIC_API_URL || 'not set'}`);
   }
 }
 

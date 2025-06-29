@@ -4,7 +4,8 @@ import path from 'path'
 import { pagePermissions } from './types/pagePermissions'
 import { getHost } from './lib/utils'  // getHost import 추가
 
-const OBSIDIAN_DIR = (process.env.REPO_PATH + "/Root") as string;
+const ROOT_DIR = process.env.OBSIDIAN_ROOT_DIR || 'Root';
+const OBSIDIAN_DIR = (process.env.REPO_PATH + `/${ROOT_DIR}`) as string;
 const DAILY_FREQUENCY = 'daily' as const;
 const baseUrl = getHost() as string;
 
@@ -58,7 +59,7 @@ async function getAllFilePaths(dir: string, baseDir: string = dir): Promise<stri
             .join('/');
           
           // _Index_of_ 파일 처리 수정
-          if (entry.name === '_Index_of_Root.md' || !entry.name.includes('_Index_of_')) {
+          if (entry.name === `_Index_of_${ROOT_DIR}.md` || !entry.name.includes('_Index_of_')) {
             if (isPathPublic(relativePath)) {
               return relativePath;
             }

@@ -6,7 +6,8 @@
     "dev": "next dev -p 33000",
     "build": "next build",
     "start": "next start -p 33000",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "npx tsc --outDir dist --noEmit false && node --test tests"
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.15",

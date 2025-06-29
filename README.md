@@ -17,7 +17,8 @@
    ```bash
    npm install
    ```
-2. `.env_sample`을 `.env`로 복사한 뒤 `SERVER_DOMAIN`, `REPO_PATH`, Firebase 키, `GITHUB_WEBHOOK_SECRET` 등 필요한 값을 입력합니다.
+2. `.env_sample`을 `.env`로 복사한 뒤 `SERVER_DOMAIN`, `REPO_PATH`, Firebase 키,
+   `GITHUB_WEBHOOK_SECRET`, `SITE_NAME`, `SITE_URL`, `SITE_AUTHOR` 등 필요한 값을 입력합니다.
 3. 개발 서버 실행
    ```bash
    npm run dev
@@ -40,6 +41,6 @@ npm run start
 - `app/` – Next.js 라우트, 컴포넌트와 유틸리티
 - `services/` – 서버 사이드 서비스 함수들
 - `public/` – 정적 자산
-- `.env_sample` – 환경 변수 예시 파일
+- `.env_sample` – 환경 변수 예시 파일 (`SITE_NAME`, `SITE_URL`, `SITE_AUTHOR` 등)
 
 노트는 `REPO_PATH/Root`에서 읽어와 페이지로 제공합니다. GitHub에서 `push` 웹훅이 오면 API가 `git pull`을 실행해 최신 내용을 반영합니다.
