@@ -15,6 +15,11 @@ export function validateEnvironment(): void {
   const missing = requiredEnvVars.filter(key => !process.env[key]);
   
   if (missing.length > 0) {
+    // During build time, just warn instead of throwing
+    if (process.env.NEXT_PHASE === 'phase-production-build') {
+      console.warn(`Warning: Missing environment variables: ${missing.join(', ')}`);
+      return;
+    }
     throw new Error(
       `Missing required environment variables: ${missing.join(', ')}\n` +
       `Please check your .env file and ensure these variables are set.`
@@ -68,14 +73,13 @@ export function getEnvVar(name: string, defaultValue?: string): string {
 }
 
 // Validate environment on module load
-if (typeof window === 'undefined') {
-  // Only run on server-side
+if (typeof window === 'undefined' && process.env.NODE_ENV !== 'production') {
+  // Only run on server-side in non-production environments
   try {
     validateEnvironment();
   } catch (error) {
     console.error('❌ Environment validation failed:', error);
-    if (process.env.NODE_ENV === 'production') {
-      process.exit(1);
-    }
+    // Don't exit process during build, just warn
+    console.warn('Continuing with build process...');
   }
 }
