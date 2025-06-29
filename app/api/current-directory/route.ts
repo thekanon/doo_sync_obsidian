@@ -3,7 +3,6 @@ import fs from 'fs';
 import path from 'path';
 import { getCurrentUser, hasPermission } from '../../lib/utils';
 import { UserRole } from '../../types/user';
-import { logger } from '@/app/lib/logger';
 
 interface DirectoryItem {
   name: string;

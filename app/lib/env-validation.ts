@@ -1,4 +1,3 @@
-import { logger } from '@/app/lib/logger';
 // Environment variable validation
 const requiredEnvVars = [
   'REPO_PATH',
@@ -37,13 +36,18 @@ export function validateEnvironment(): void {
 
   const rootDir = process.env.OBSIDIAN_ROOT_DIR || 'Root';
   if (repoPath) {
-    const fullRootPath = require('path').join(repoPath, rootDir);
-    import('fs').then(fs => {
-      if (!fs.existsSync(fullRootPath)) {
-        console.warn(`Warning: OBSIDIAN_ROOT_DIR does not exist: ${fullRootPath}`);
-      }
+    // Dynamic import to avoid ESLint error
+    import('path').then(path => {
+      const fullRootPath = path.join(repoPath, rootDir);
+      import('fs').then(fs => {
+        if (!fs.existsSync(fullRootPath)) {
+          console.warn(`Warning: OBSIDIAN_ROOT_DIR does not exist: ${fullRootPath}`);
+        }
+      }).catch(() => {
+        console.warn('Could not validate OBSIDIAN_ROOT_DIR existence');
+      });
     }).catch(() => {
-      console.warn('Could not validate OBSIDIAN_ROOT_DIR existence');
+      console.warn('Could not import path module');
     });
   }
 
