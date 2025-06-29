@@ -19,6 +19,12 @@ export const hasPermission = (
   path: string
 ): boolean => {
   const decodedPath = decodeURIComponent(path);
+  
+  // Remove common prefixes that might interfere with pattern matching
+  const cleanPath = decodedPath
+    .replace(/^\/Root\//, '/') // Remove /Root/ prefix
+    .replace(/\/_Index_of_/, '/') // Normalize index paths
+    .replace(/\.md$/, ''); // Remove .md extension
 
   const permission = pagePermissions.find((p) => {
     // `p.path`도 디코딩하고, 와일드카드(*)를 정규식 패턴으로 변환
@@ -26,13 +32,12 @@ export const hasPermission = (
       `^${decodeURIComponent(p.path).replace(/\*/g, ".*")}$`
     );
 
-    return regexPattern.test(decodedPath);
+    return regexPattern.test(decodedPath) || regexPattern.test(cleanPath);
   });
 
-  console.log("🔒 permission", permission);
-  console.log("🔒 path", decodedPath);
 
   if (!permission) return true; // 정의되지 않은 경로는 기본적으로 접근 허용
+  
   return (
     permission.allowedRoles.includes(userRole || UserRole.ANONYMOUS) ||
     permission?.isPublic
