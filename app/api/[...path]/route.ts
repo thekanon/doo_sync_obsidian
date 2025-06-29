@@ -35,8 +35,9 @@ marked.setOptions({
   breaks: true, // 줄바꿈 시 <br> 태그를 추가하도록 설정
 });
 
-const OBSIDIAN_DIR = (process.env.REPO_PATH + "/Root") as string;
-const OBSIDIAN_LINK_REGEX = /\[([^\]]+)\]\(Root/g;
+const ROOT_DIR = process.env.OBSIDIAN_ROOT_DIR || 'Root';
+const OBSIDIAN_DIR = (process.env.REPO_PATH + `/${ROOT_DIR}`) as string;
+const OBSIDIAN_LINK_REGEX = new RegExp(`\\[([^\\]]+)\\]\\(${ROOT_DIR}`, 'g');
 const OBSIDIAN_INDEX_REGEX = /\[\[([^\|]+)\|([^\]]+)\]\]/g;
 
 const REMARK_REGEX = /%%[^%]+%%/g;
@@ -60,7 +61,7 @@ interface ApiResponse {
 const convertObsidianIndexLinks = (content: string): string => {
   return content.replace(OBSIDIAN_INDEX_REGEX, (_, link, text) => {
     const formattedLink = link.replace(/ /g, "%20");
-    const removeRoot = formattedLink.replace("Root/", "");
+    const removeRoot = formattedLink.replace(`${ROOT_DIR}/`, "");
     return `[${text}](/${removeRoot}.md)`;
   });
 };

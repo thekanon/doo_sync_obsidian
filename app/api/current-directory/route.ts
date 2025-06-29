@@ -19,7 +19,8 @@ export async function GET(request: NextRequest) {
     const currentPath = searchParams.get('path') || '';
     
     const repoPath = process.env.REPO_PATH || '';
-    const rootDir = path.join(repoPath, 'Root');
+    const rootDirName = process.env.OBSIDIAN_ROOT_DIR || 'Root';
+    const rootDir = path.join(repoPath, rootDirName);
     
     if (!repoPath || !fs.existsSync(rootDir)) {
       return NextResponse.json({ error: 'Root directory not found' }, { status: 404 });
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
     let directoryToScan = rootDir;
     let relativePath = '';
     
-    if (currentPath && currentPath !== '/' && currentPath !== '_Index_of_Root.md') {
+    if (currentPath && currentPath !== '/' && currentPath !== `_Index_of_${rootDirName}.md`) {
       // Clean the path - remove leading slash and decode URL
       const cleanPath = decodeURIComponent(currentPath.startsWith('/') ? currentPath.slice(1) : currentPath);
       
@@ -106,7 +107,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({ 
       items,
-      currentPath: relativePath || 'Root',
+      currentPath: relativePath || rootDirName,
       totalCount: items.length
     });
   } catch (error) {

@@ -31,6 +31,7 @@ export function isIndexPage(path: string): boolean {
   );
 }
 
+const ROOT_DIR = process.env.OBSIDIAN_ROOT_DIR || 'Root';
 export function isRootPath(path: string): boolean {
-  return path === "_Index_of_Root.md";
+  return path === `_Index_of_${ROOT_DIR}.md`;
 }

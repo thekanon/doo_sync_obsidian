@@ -22,7 +22,7 @@ export const pagePermissions: PagePermission[] = [
     isPublic: true,
   },
   {
-    path: '/_Index_of_Root*',
+    path: `/_Index_of_${process.env.OBSIDIAN_ROOT_DIR || 'Root'}*`,
     allowedRoles: [],
     isPublic: true,
   },
@@ -88,4 +88,4 @@ export const pagePermissions: PagePermission[] = [
   // },
 ];
 
-export const isPublicPageList = ['/', '/login*', '/_Index_of_Root*', '/unauthorized'];
+export const isPublicPageList = ['/', '/login*', `/_Index_of_${process.env.OBSIDIAN_ROOT_DIR || 'Root'}*`, '/unauthorized'];

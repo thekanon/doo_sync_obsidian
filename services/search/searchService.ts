@@ -52,7 +52,8 @@ export function search(
         const end = Math.min(doc.content.length, pos + lower.length + 30);
         snippet = doc.content.slice(start, end).replace(/\n/g, " ");
       }
-      const relative = doc.path.split("Root")[1].replace(/^\//, "");
+      const rootDirName = process.env.OBSIDIAN_ROOT_DIR || 'Root';
+      const relative = doc.path.split(rootDirName)[1].replace(/^\//, "");
       return { path: `/${relative}`, title: doc.title, snippet };
     })
     .filter((result) => hasPermission(userRole, result.path));
