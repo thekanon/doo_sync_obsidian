@@ -1,8 +1,10 @@
 import { useRouter } from "next/navigation";
 import { useUserIcon } from "@/app/utils/authUtils";
 
+import firebase from "firebase/compat/app";
+
 interface UserStatusProps {
-  user: any;
+  user: firebase.User | null;
   userType: string;
   loading: boolean;
   error: string | null;

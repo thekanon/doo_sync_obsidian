@@ -52,7 +52,7 @@ export function parseHtmlToReact(
       const props = node.attributes;
 
       if (node.tagName.toLowerCase() === "input" && props.type === "checkbox") {
-        const checkboxProps = props as any;
+        const checkboxProps = props as Record<string, string | boolean>;
         checkboxProps.checked = checkboxProps.checked === "" ? true : false;
       }
 
@@ -91,7 +91,7 @@ export function parseHtmlToReact(
 
 function handleLinkElement(
   node: HTMLElement,
-  props: any,
+  props: Record<string, string>,
   isIndexPage: boolean,
   role?: UserRole,
   directoryFiles?: DirectoryFile[]
@@ -115,7 +115,7 @@ function handleLinkElement(
 
 function createDirectoryFileLink(
   node: HTMLElement,
-  props: any,
+  props: Record<string, string>,
   text: string,
   role?: UserRole,
   directoryFiles?: DirectoryFile[]
@@ -144,7 +144,7 @@ function createDirectoryFileLink(
 
 function createRegularFileLink(
   node: HTMLElement,
-  props: any,
+  props: Record<string, string>,
   text: string,
   role?: UserRole,
   directoryFiles?: DirectoryFile[]
