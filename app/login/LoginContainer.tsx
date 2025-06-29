@@ -86,6 +86,20 @@ const LoginPage = () => {
     return () => unregisterAuthObserver();
   }, []);
 
+  const getAuthInfo = useCallback(async (user: firebase.User) => {
+    try {
+      // 로그인 성공 시 JWT 토큰을 서버에 쿠키로 저장하기 위한 핸들러
+      const success = await handleAuthentication(user);
+      if (success) {
+        router.push("/");
+      } else {
+        setError("인증에 실패했습니다.");
+      }
+    } catch (err) {
+      setError("로그인 중 오류가 발생했습니다.");
+    }
+  }, [router]);
+
   useEffect(() => {
     if (!user) {
       logger.debug("FirebaseUI 초기화 중");
@@ -136,20 +150,6 @@ const LoginPage = () => {
       getAuthInfo(user);
     }
   }, [user, getAuthInfo]);
-
-  const getAuthInfo = useCallback(async (user: firebase.User) => {
-    try {
-      // 로그인 성공 시 JWT 토큰을 서버에 쿠키로 저장하기 위한 핸들러
-      const success = await handleAuthentication(user);
-      if (success) {
-        router.push("/");
-      } else {
-        setError("인증에 실패했습니다.");
-      }
-    } catch (err) {
-      setError("로그인 중 오류가 발생했습니다.");
-    }
-  }, [router]);
 
   const handleSignOut = async () => {
     if (typeof window !== "undefined") {
