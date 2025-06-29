@@ -14,7 +14,7 @@ export async function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   const path = request.nextUrl.pathname;
 
-  requestHeaders.set("x-obsidian-url", "doo-brain");
+  requestHeaders.set("x-obsidian-url", process.env.OBSIDIAN_URL || "obsidian");
 
   const response = NextResponse.next({
     request: {
