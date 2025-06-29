@@ -1,0 +1,17 @@
+{
+  "buildCommand": "npm run build",
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 60
+    }
+  },
+  "build": {
+    "env": {
+      "NEXT_PHASE": "phase-production-build"
+    }
+  },
+  "env": {
+    "OBSIDIAN_ROOT_DIR": "Root",
+    "OBSIDIAN_URL": "obsidian"
+  }
+}
