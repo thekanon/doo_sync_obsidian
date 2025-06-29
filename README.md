@@ -17,7 +17,7 @@
    ```bash
    npm install
    ```
-2. `.env_sample`을 `.env`로 복사한 뒤 `SERVER_DOMAIN`, `REPO_PATH`, Firebase 키,
+2. `.env_sample`을 `.env`로 복사한 뒤 `SERVER_DOMAIN`, `REPO_PATH`, `OBSIDIAN_URL`, Firebase 키,
    `GITHUB_WEBHOOK_SECRET`, `SITE_NAME`, `SITE_URL`, `SITE_AUTHOR` 등 필요한 값을 입력합니다.
 3. 개발 서버 실행
    ```bash
@@ -41,6 +41,36 @@ npm run start
 - `app/` – Next.js 라우트, 컴포넌트와 유틸리티
 - `services/` – 서버 사이드 서비스 함수들
 - `public/` – 정적 자산
-- `.env_sample` – 환경 변수 예시 파일 (`SITE_NAME`, `SITE_URL`, `SITE_AUTHOR` 등)
+- `.env_sample` – 환경 변수 예시 파일 (`SITE_NAME`, `SITE_URL`, `SITE_AUTHOR`, `OBSIDIAN_URL` 등)
 
 노트는 `REPO_PATH/Root`에서 읽어와 페이지로 제공합니다. GitHub에서 `push` 웹훅이 오면 API가 `git pull`을 실행해 최신 내용을 반영합니다.
+
+## 환경 변수 설명
+
+### OBSIDIAN_URL
+이 환경 변수는 Obsidian vault나 프로젝트의 식별자를 설정합니다. 미들웨어에서 이 값을 사용해 `x-obsidian-url` HTTP 헤더를 설정합니다.
+
+**용도:**
+- 클라이언트 애플리케이션이나 API에서 현재 Obsidian vault의 식별자를 알 수 있게 함
+- 다중 vault 환경에서 각각을 구분하기 위한 식별자 역할
+- 로깅이나 분석 목적으로 vault별 구분이 필요할 때 사용
+
+**설정 예시:**
+```bash
+OBSIDIAN_URL=my-knowledge-base
+# 또는
+OBSIDIAN_URL=team-docs
+# 또는  
+OBSIDIAN_URL=personal-notes
+```
+
+**기본값:** `obsidian` (환경 변수가 설정되지 않은 경우)
+
+### x-obsidian-url 헤더
+미들웨어(`middleware.ts`)에서 모든 요청에 `x-obsidian-url` 헤더를 자동으로 추가합니다. 이 헤더는 `OBSIDIAN_URL` 환경 변수의 값을 포함합니다.
+
+**사용 사례:**
+- API 응답에서 현재 vault 식별자 확인
+- 클라이언트 측에서 서버의 vault 정보 접근
+- 다중 인스턴스 환경에서의 요청 라우팅
+- 디버깅 및 모니터링 목적
