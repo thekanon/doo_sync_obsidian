@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { logger } from "@/app/lib/logger";
 import { UserRole } from "@/app/types/user";
 import {
   getCurrentUser,
@@ -35,7 +36,7 @@ export async function middleware(request: NextRequest) {
       id: user.uid,
       role: user.role,
     };
-    console.log("😈 userInfo", userInfo);
+    logger.debug("😈 userInfo", userInfo);
     requestHeaders.set("x-user-info", JSON.stringify(userInfo));
   }
 
@@ -49,15 +50,15 @@ export async function middleware(request: NextRequest) {
     // 그 외에는 방문 횟수 체크 하여 방문 횟수가 10회 이상이면 리다이렉트
     await handleVisitCount(request);
   } else {
-    console.log("user.role", user.role);
+    logger.debug("user.role", user.role);
   }
 
   // 페이지 권한 체크하여 권한이 없는 경우 리다이렉트
   if (!hasPermission(user?.role as UserRole, path)) {
-    console.log("👮‍♂️ permission check failed");
+    logger.debug("👮‍♂️ permission check failed");
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
-  console.log("👮‍♂️ permission check");
+  logger.debug("👮‍♂️ permission check");
 
   // 새로운 response 객체 생성
   const finalResponse = NextResponse.next({
@@ -65,7 +66,7 @@ export async function middleware(request: NextRequest) {
       headers: requestHeaders,
     },
   });
-  console.log("🚀 middleware");
+  logger.debug("🚀 middleware");
   // 방문 횟수 초기화
   const resetResponse = await resetVisitCount(requestHeaders);
   if (resetResponse) return resetResponse;

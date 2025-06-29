@@ -21,9 +21,45 @@ export function validateEnvironment(): void {
   const missing = requiredEnvVars.filter(key => !process.env[key]);
   
   if (missing.length > 0) {
+    // During build time, just warn instead of throwing
+    if (process.env.NEXT_PHASE === 'phase-production-build') {
+      console.warn(`Warning: Missing environment variables: ${missing.join(', ')}`);
+      return;
+    }
     console.warn(`⚠️ Missing environment variables: ${missing.join(', ')}`);
     console.warn('Some features may not work correctly.');
     return; // Don't throw, just warn
+  }
+
+  // Validate REPO_PATH exists
+  const repoPath = process.env.REPO_PATH;
+  if (repoPath) {
+    // Dynamic import to avoid ESLint error
+    import('fs').then(fs => {
+      if (!fs.existsSync(repoPath)) {
+        console.warn(`Warning: REPO_PATH directory does not exist: ${repoPath}`);
+      }
+    }).catch(() => {
+      console.warn('Could not validate REPO_PATH existence');
+    });
+  }
+
+  const rootDir = process.env.OBSIDIAN_ROOT_DIR || 'Root';
+  if (repoPath) {
+    // Dynamic import to avoid ESLint error
+    import('path').then(path => {
+      const fullRootPath = path.join(repoPath, rootDir);
+      import('fs').then(fs => {
+        if (!fs.existsSync(fullRootPath)) {
+          console.warn(`Warning: OBSIDIAN_ROOT_DIR does not exist: ${fullRootPath}`);
+        }
+      }).catch(() => {
+        console.warn('Could not validate OBSIDIAN_ROOT_DIR existence');
+      });
+    }).catch(() => {
+      console.warn('Could not import path module');
+    });
+  }
   }
 
   // Log environment status in development
