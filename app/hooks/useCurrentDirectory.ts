@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { getSpecialPageItems, type SpecialPageItem } from "../../services/specialPagesService";
 
 export interface DirectoryItem {
   name: string;
@@ -24,26 +25,16 @@ export function useCurrentDirectory() {
     const fetchCurrentDirectory = async () => {
       setLoading(true);
       try {
-        // Special handling for "Doo Wiki 란.md" - show the 3 specific files
-        if (pathname.includes("Doo Wiki 란.md")) {
-          const specificItems: DirectoryItem[] = [
-            {
-              name: "Doo Wiki 작업노트",
-              path: "/0. about Doo Wiki/Doo Wiki 작업노트.md",
-              isDirectory: false,
-            },
-            {
-              name: "Doo Wiki 남은 작업",
-              path: "/0. about Doo Wiki/Doo Wiki 남은 작업.md",
-              isDirectory: false,
-            },
-            {
-              name: "Doo Wiki 란",
-              path: "/0. about Doo Wiki/Doo Wiki 란.md",
-              isDirectory: false,
-            },
-          ];
-          setCurrentDirItems(specificItems);
+        // Check for special page handling
+        const specialPageItems = getSpecialPageItems(pathname);
+        if (specialPageItems) {
+          // Convert SpecialPageItem to DirectoryItem
+          const directoryItems: DirectoryItem[] = specialPageItems.map(item => ({
+            name: item.name,
+            path: item.path,
+            isDirectory: item.isDirectory,
+          }));
+          setCurrentDirItems(directoryItems);
           setLoading(false);
           return;
         }

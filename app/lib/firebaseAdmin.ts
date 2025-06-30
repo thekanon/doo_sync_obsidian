@@ -52,7 +52,7 @@ export const initializeFirebaseAdmin = (): Auth => {
           ...serviceAccountKey,
           privateKey: privateKey,
         }),
-        databaseURL: "https://doowiki-874c3-default-rtdb.firebaseio.com",
+        databaseURL: process.env.FIREBASE_DATABASE_URL,
       });
       auth = getAuth(app);
       logger.debug("Firebase Admin SDK initialized successfully");
