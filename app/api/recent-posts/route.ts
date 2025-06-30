@@ -7,6 +7,7 @@ import { UserRole } from '../../types/user';
 import { createErrorResponse, createSuccessResponse, checkRateLimit } from '../../lib/api-utils';
 import { getEnvVar } from '../../lib/env-validation';
 import { logger } from '@/app/lib/logger';
+import { isPrivateFolder } from '../../../services/privateFoldersService';
 
 interface FileInfo {
   name: string;
@@ -62,18 +63,6 @@ async function getRecentMarkdownFiles(
   return files.sort((a, b) => b.modifiedAt.getTime() - a.modifiedAt.getTime()).slice(0, maxFiles);
 }
 
-function isPrivateFolder(path: string): boolean {
-  const privateFolders = [
-    '/1. 일지',
-    '/7. 생각정리',
-    '/8. 루틴', 
-    '/97. 보안 폴더',
-    '/98. 미분류',
-    '/99. 일기'
-  ];
-  
-  return privateFolders.some(folder => path.startsWith(folder));
-}
 
 export async function GET(request: NextRequest) {
   try {

@@ -24,28 +24,15 @@ export function useCurrentDirectory() {
     const fetchCurrentDirectory = async () => {
       setLoading(true);
       try {
-        // Special handling for "Doo Wiki 란.md" - show the 3 specific files
-        if (pathname.includes("Doo Wiki 란.md")) {
-          const specificItems: DirectoryItem[] = [
-            {
-              name: "Doo Wiki 작업노트",
-              path: "/0. about Doo Wiki/Doo Wiki 작업노트.md",
-              isDirectory: false,
-            },
-            {
-              name: "Doo Wiki 남은 작업",
-              path: "/0. about Doo Wiki/Doo Wiki 남은 작업.md",
-              isDirectory: false,
-            },
-            {
-              name: "Doo Wiki 란",
-              path: "/0. about Doo Wiki/Doo Wiki 란.md",
-              isDirectory: false,
-            },
-          ];
-          setCurrentDirItems(specificItems);
-          setLoading(false);
-          return;
+        // Check for special page handling via API
+        const specialResponse = await fetch(`/api/special-pages?path=${encodeURIComponent(pathname)}`);
+        if (specialResponse.ok) {
+          const specialData = await specialResponse.json();
+          if (specialData.items && specialData.items.length > 0) {
+            setCurrentDirItems(specialData.items);
+            setLoading(false);
+            return;
+          }
         }
 
         // Call the API to get current directory contents

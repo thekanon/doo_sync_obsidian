@@ -3,6 +3,11 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
+// Skip validation during build time
+if (typeof window === 'undefined' && process.env.NODE_ENV !== 'production' && (!process.env.SITE_NAME || !process.env.SITE_URL || !process.env.SITE_AUTHOR)) {
+  console.warn('Required environment variables are missing: SITE_NAME, SITE_URL, SITE_AUTHOR');
+}
+
 const siteName = process.env.SITE_NAME || "DooWiki";
 const siteUrl = process.env.SITE_URL || "https://doowiki.site";
 const siteAuthor = process.env.SITE_AUTHOR || "DooDeveloper";

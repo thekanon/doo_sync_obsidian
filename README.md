@@ -46,12 +46,27 @@
 
 2. `.env` 파일에 Firebase 구성 정보를 추가하세요:
    ```bash
+   # Firebase 클라이언트 설정
    NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
    NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
    NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+   
+   # Firebase Admin SDK 설정
+   FIREBASE_PRIVATE_KEY=your-private-key
+   FIREBASE_PROJECT_ID=your-project-id
+   FIREBASE_CLIENT_EMAIL=your-service-account-email
+   FIREBASE_PRIVATE_KEY_ID=your-private-key-id
+   FIREBASE_CLIENT_ID=your-client-id
+   GOOGLE_CLOUD_CLIENT_X509_CERT_URL=your-cert-url
+   FIREBASE_DATABASE_URL=https://your-project-default-rtdb.firebaseio.com
+   
+   # 사이트 정보 (필수)
+   SITE_NAME=your-site-name
+   SITE_URL=https://your-site-url.com
+   SITE_AUTHOR=your-name
    ```
 
 ### 3. Firebase Admin SDK 설정 (선택사항)
@@ -108,6 +123,114 @@ OBSIDIAN_URL=personal-notes
 - 클라이언트 측에서 서버의 vault 정보 접근
 - 다중 인스턴스 환경에서의 요청 라우팅
 - 디버깅 및 모니터링 목적
+
+## 설정 파일 관리
+
+### Private Folders 설정
+개인 폴더 목록을 외부 설정 파일로 관리할 수 있습니다.
+
+**환경 변수:**
+```bash
+PRIVATE_FOLDERS_FILE=config/private-folders.md
+```
+
+**설정 파일 형식 (config/private-folders.md):**
+```markdown
+# Private Folders Configuration
+
+- /1. 일지
+- /7. 생각정리  
+- /8. 루틴
+- /97. 보안 폴더
+- /98. 미분류
+- /99. 일기
+```
+
+- 마크다운 형식의 불릿 포인트(`-` 또는 `*`) 사용
+- 직접 경로 입력 (`/폴더명`)
+- 빈 줄과 주석(`#` 또는 `//`로 시작) 무시
+- 파일이 없으면 기본 폴더 목록 사용
+
+**테스트:**
+```bash
+npm test -- privateFoldersService.test.js
+```
+
+### Page Permissions 설정
+페이지별 권한 설정을 외부 JSON 파일로 관리할 수 있습니다.
+
+**환경 변수:**
+```bash
+PAGE_PERMISSIONS_FILE=config/page-permissions.json
+```
+
+**설정 파일 형식 (config/page-permissions.json):**
+```json
+[
+  {
+    "path": "/",
+    "allowedRoles": [],
+    "isPublic": true
+  },
+  {
+    "path": "/1. 일지*",
+    "allowedRoles": ["ADMIN"],
+    "isPublic": false
+  },
+  {
+    "path": "/8. 루틴*",
+    "allowedRoles": ["ADMIN", "VERIFIED"],
+    "isPublic": false
+  }
+]
+```
+
+**필드 설명:**
+- `path`: 페이지 경로 (와일드카드 `*` 지원)
+- `allowedRoles`: 접근 가능한 사용자 역할 배열
+- `isPublic`: 공개 페이지 여부
+
+**사용 가능한 역할:**
+- `ADMIN`: 관리자
+- `VERIFIED`: 인증된 사용자
+- `GUEST`: 게스트 사용자
+- `ANONYMOUS`: 익명 사용자
+
+설정 파일이 없으면 기본 권한 설정을 사용합니다.
+
+### Special Pages 설정
+특정 페이지에 대한 특별한 디렉토리 표시 로직을 외부 JSON 파일로 관리할 수 있습니다.
+
+**환경 변수:**
+```bash
+SPECIAL_PAGES_FILE=config/special-pages.json
+```
+
+**설정 파일 형식 (config/special-pages.json):**
+```json
+{
+  "Doo Wiki 란.md": [
+    {
+      "name": "Doo Wiki 작업노트",
+      "path": "/0. about Doo Wiki/Doo Wiki 작업노트.md",
+      "isDirectory": false
+    },
+    {
+      "name": "Doo Wiki 남은 작업", 
+      "path": "/0. about Doo Wiki/Doo Wiki 남은 작업.md",
+      "isDirectory": false
+    }
+  ]
+}
+```
+
+**필드 설명:**
+- 키: 특별 처리할 페이지 경로의 일부 (pathname.includes()로 매칭)
+- `name`: 표시할 항목 이름
+- `path`: 링크할 경로
+- `isDirectory`: 디렉토리 여부
+
+설정 파일이 없으면 기본 특별 페이지 설정을 사용합니다.
 
 ## 📄 라이선스
 
