@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { getSpecialPageItems, type SpecialPageItem } from "../../services/specialPagesService";
 
 export interface DirectoryItem {
   name: string;
@@ -25,18 +24,15 @@ export function useCurrentDirectory() {
     const fetchCurrentDirectory = async () => {
       setLoading(true);
       try {
-        // Check for special page handling
-        const specialPageItems = getSpecialPageItems(pathname);
-        if (specialPageItems) {
-          // Convert SpecialPageItem to DirectoryItem
-          const directoryItems: DirectoryItem[] = specialPageItems.map(item => ({
-            name: item.name,
-            path: item.path,
-            isDirectory: item.isDirectory,
-          }));
-          setCurrentDirItems(directoryItems);
-          setLoading(false);
-          return;
+        // Check for special page handling via API
+        const specialResponse = await fetch(`/api/special-pages?path=${encodeURIComponent(pathname)}`);
+        if (specialResponse.ok) {
+          const specialData = await specialResponse.json();
+          if (specialData.items && specialData.items.length > 0) {
+            setCurrentDirItems(specialData.items);
+            setLoading(false);
+            return;
+          }
         }
 
         // Call the API to get current directory contents
