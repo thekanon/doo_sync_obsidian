@@ -36,6 +36,23 @@ marked.setOptions({
   breaks: true, // 줄바꿈 시 <br> 태그를 추가하도록 설정
 });
 
+// 코드블록 렌더링을 위한 커스텀 렌더러 설정
+const renderer = new marked.Renderer();
+renderer.code = function({ text, lang }) {
+  const validLanguage = lang && lang.match(/^[a-zA-Z0-9_+-]*$/);
+  const langClass = validLanguage ? ` class="language-${lang}"` : '';
+  // HTML 이스케이핑된 텍스트를 다시 디코딩
+  const decodedCode = text
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+  return `<pre><code${langClass}>${decodedCode}</code></pre>`;
+};
+
+marked.use({ renderer });
+
 const ROOT_DIR = process.env.OBSIDIAN_ROOT_DIR || 'Root';
 const OBSIDIAN_DIR = (process.env.REPO_PATH + `/${ROOT_DIR}`) as string;
 const OBSIDIAN_LINK_REGEX = new RegExp(`\\[([^\\]]+)\\]\\(${ROOT_DIR}`, 'g');
