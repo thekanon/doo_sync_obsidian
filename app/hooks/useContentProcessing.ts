@@ -1,7 +1,6 @@
 import React from "react";
 import { UserRole } from "@/app/types/user";
-import { DirectoryFile, parseHtmlToReact } from "@/app/lib/obsidian/parser";
-import { sanitizeHtml } from "@/app/lib/obsidian/content-processor";
+import { DirectoryFile } from "@/app/lib/obsidian/parser";
 
 interface UseContentProcessingProps {
   content: string;
@@ -14,23 +13,13 @@ interface UseContentProcessingProps {
 
 export function useContentProcessing({
   content,
-  path,
-  role,
-  updatedAt,
-  createdAt,
-  directoryFiles,
 }: UseContentProcessingProps): React.ReactNode {
   const parsedContent = React.useMemo(() => {
-    const sanitizedContent = sanitizeHtml(content);
-    return parseHtmlToReact(
-      sanitizedContent,
-      path,
-      role,
-      updatedAt,
-      createdAt,
-      directoryFiles
-    );
-  }, [content, path, role, updatedAt, createdAt, directoryFiles]);
+    // HTML 파싱 대신 dangerouslySetInnerHTML 사용하여 직접 렌더링
+    return React.createElement('div', {
+      dangerouslySetInnerHTML: { __html: content }
+    });
+  }, [content]);
 
   return parsedContent;
 }
