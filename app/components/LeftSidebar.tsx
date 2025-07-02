@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ApiResponse, RecentPost, PopularPost, LinkItem } from "../types/api";
+import { useCache } from "../contexts/CacheContext";
 
 // Remove duplicate interfaces - using imported types
 
@@ -71,9 +72,22 @@ function LeftSidebarComponent() {
   const [popularPosts, setPopularPosts] = useState<PopularPost[]>([]);
   const [links, setLinks] = useState<LinkItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const cache = useCache();
 
   useEffect(() => {
+    const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+    
     const loadData = async () => {
+      // Check if we have valid cached data
+      const cachedData = cache.getCache('sidebar');
+      if (cachedData && cache.isCacheValid('sidebar', CACHE_DURATION)) {
+        setRecentPosts(cachedData.recentPosts);
+        setPopularPosts(cachedData.popularPosts);
+        setLinks(cachedData.links);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       try {
         const [recentData, popularData, linksData] = await Promise.all([
@@ -85,6 +99,14 @@ function LeftSidebarComponent() {
         setRecentPosts(recentData);
         setPopularPosts(popularData);
         setLinks(linksData);
+
+        // Cache the data globally
+        cache.setCache('sidebar', {
+          recentPosts: recentData,
+          popularPosts: popularData,
+          links: linksData,
+          timestamp: Date.now()
+        });
       } catch (error) {
         console.error('Error loading sidebar data:', error);
       } finally {
@@ -93,7 +115,7 @@ function LeftSidebarComponent() {
     };
 
     loadData();
-  }, []);
+  }, [cache]);
 
   const renderPostsContent = () => {
     if (loading) {

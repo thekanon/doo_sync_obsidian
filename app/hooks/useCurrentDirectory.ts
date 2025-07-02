@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { useCache } from "../contexts/CacheContext";
 
 export interface DirectoryItem {
   name: string;
@@ -16,10 +17,22 @@ export function useCurrentDirectory() {
   const [currentDirItems, setCurrentDirItems] = useState<DirectoryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const pathname = usePathname();
+  const cache = useCache();
 
   // Fetch current directory contents via API
   useEffect(() => {
     if (!pathname) return;
+
+    const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+    const currentDirectory = pathname.split('/').slice(0, -1).join('/') || '/';
+    const cacheKey = currentDirectory;
+    
+    // Check if we have valid cached data
+    const cachedItems = cache.getDirectoryCache(cacheKey);
+    if (cachedItems && cache.isCacheValid('directories', CACHE_DURATION, cacheKey)) {
+      setCurrentDirItems(cachedItems);
+      return;
+    }
 
     const fetchCurrentDirectory = async () => {
       setLoading(true);
@@ -30,6 +43,7 @@ export function useCurrentDirectory() {
           const specialData = await specialResponse.json();
           if (specialData.items && specialData.items.length > 0) {
             setCurrentDirItems(specialData.items);
+            cache.setDirectoryCache(cacheKey, specialData.items);
             setLoading(false);
             return;
           }
@@ -48,7 +62,11 @@ export function useCurrentDirectory() {
         }
 
         const data = await response.json();
-        setCurrentDirItems(data.items || []);
+        const items = data.items || [];
+        setCurrentDirItems(items);
+        
+        // Cache the result globally
+        cache.setDirectoryCache(cacheKey, items);
       } catch (error) {
         console.error("Error fetching current directory:", error);
         setCurrentDirItems([]);
@@ -58,7 +76,7 @@ export function useCurrentDirectory() {
     };
 
     fetchCurrentDirectory();
-  }, [pathname]);
+  }, [pathname, cache]);
 
   const toggleDirectory = (path: string) => {
     const newExpanded = new Set(expandedDirs);

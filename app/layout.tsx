@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
+import { CacheProvider } from "./contexts/CacheContext";
 
 // Skip validation during build time
 if (typeof window === 'undefined' && process.env.NODE_ENV !== 'production' && (!process.env.SITE_NAME || !process.env.SITE_URL || !process.env.SITE_AUTHOR)) {
@@ -38,7 +39,9 @@ export default function RootLayout({
       <body
         className={`${GeistSans.className} ${GeistMono.className} antialiased leading-relaxed text-gray-900 bg-white`}
       >
-        {children}
+        <CacheProvider>
+          {children}
+        </CacheProvider>
       </body>
     </html>
   );

@@ -1,0 +1,56 @@
+{
+  "folderPermissions": [
+    {
+      "path": "/1. 일지*",
+      "allowedRoles": ["ADMIN"],
+      "isPublic": false,
+      "description": "개인 일지 폴더 - 관리자만 접근 가능"
+    },
+    {
+      "path": "/3. 회사*",
+      "allowedRoles": ["ADMIN"],
+      "isPublic": false,
+      "description": "회사 관련 폴더 - 관리자만 접근 가능"
+    },
+    {
+      "path": "/8. 루틴*",
+      "allowedRoles": ["ADMIN", "VERIFIED"],
+      "isPublic": false,
+      "description": "루틴 관련 폴더 - 인증된 사용자 접근 가능"
+    },
+    {
+      "path": "/97. 보안 폴더*",
+      "allowedRoles": ["ADMIN"],
+      "isPublic": false,
+      "description": "보안 관련 폴더 - 관리자만 접근 가능"
+    },
+    {
+      "path": "/98. 미분류*",
+      "allowedRoles": ["ADMIN"],
+      "isPublic": false,
+      "description": "미분류 폴더 - 관리자만 접근 가능"
+    },
+    {
+      "path": "/99. 일기*",
+      "allowedRoles": ["ADMIN"],
+      "isPublic": false,
+      "description": "개인 일기 폴더 - 관리자만 접근 가능"
+    }
+  ],
+  "defaultPermissions": {
+    "publicFolders": [
+      "/2. 공개*",
+      "/4. 프로젝트*",
+      "/5. 학습*"
+    ],
+    "guestAccessible": [
+      "/공지사항*",
+      "/도움말*"
+    ]
+  },
+  "settings": {
+    "inheritPermissions": true,
+    "wildcardEnabled": true,
+    "caseSensitive": false
+  }
+}

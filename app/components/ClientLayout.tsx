@@ -1,4 +1,5 @@
 "use client";
+import React, { memo } from "react";
 import Header from "./Header";
 import Breadcrumbs from "./Breadcrumbs";
 import LeftSidebar from "./LeftSidebar";
@@ -11,18 +12,23 @@ interface ClientLayoutProps {
   children: React.ReactNode;
 }
 
+const MemoizedHeader = memo(Header);
+const MemoizedBreadcrumbs = memo(Breadcrumbs);
+const MemoizedCurrentDirectory = memo(CurrentDirectory);
+const MemoizedLeftSidebar = memo(LeftSidebar);
+
 export default function ClientLayout({ user, children }: ClientLayoutProps) {
   return (
     <>
-      <Header user={user} />
-      <Breadcrumbs />
+      <MemoizedHeader user={user} />
+      <MemoizedBreadcrumbs />
 
       {/* Main Layout Container */}
       <div className="flex flex-1 max-w-full lg:max-w-[1920px] mx-auto w-full overflow-hidden">
         {/* Left Sidebar - Desktop Only */}
         <div className="hidden lg:block flex-shrink-0">
           <div className="sticky top-0 h-screen overflow-y-auto">
-            <CurrentDirectory />
+            <MemoizedCurrentDirectory />
           </div>
         </div>
 
@@ -33,7 +39,7 @@ export default function ClientLayout({ user, children }: ClientLayoutProps) {
             
             {/* Mobile Recent & Popular Posts - Below Content */}
             <div className="block xl:hidden mt-8 pt-6 border-t border-gray-200">
-              <LeftSidebar />
+              <MemoizedLeftSidebar />
             </div>
           </div>
         </div>
@@ -41,7 +47,7 @@ export default function ClientLayout({ user, children }: ClientLayoutProps) {
         {/* Right Sidebar - Desktop Only */}
         <div className="hidden xl:block flex-shrink-0">
           <div className="sticky top-0 h-screen overflow-y-auto">
-            <LeftSidebar />
+            <MemoizedLeftSidebar />
           </div>
         </div>
       </div>
