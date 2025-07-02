@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ApiResponse, RecentPost, PopularPost, LinkItem } from "../types/api";
+import { RecentPost, PopularPost, LinkItem } from "../types/api";
 import { useCache } from "../contexts/CacheContext";
 
 // Remove duplicate interfaces - using imported types

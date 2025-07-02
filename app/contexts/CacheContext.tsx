@@ -54,7 +54,7 @@ export function CacheProvider({ children }: CacheProviderProps) {
     
     // For sidebar data, check timestamp
     if (key === 'sidebar' && 'timestamp' in cached) {
-      return Date.now() - cached.timestamp < duration;
+      return Date.now() - (cached as SidebarData).timestamp < duration;
     }
     
     // For directories data, check timestamp of specific directory

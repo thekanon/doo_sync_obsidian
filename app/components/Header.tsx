@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { User, UserRole } from "../types/user";
+import { UserRole } from "../types/user";
 import { AUTH_STATUS_MESSAGES } from "@/app/types/auth";
 import { debounce } from "es-toolkit";
 import dynamic from "next/dynamic";
