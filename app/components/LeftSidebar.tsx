@@ -10,14 +10,16 @@ import { useCache } from "../contexts/CacheContext";
 const fetchRecentPosts = async (): Promise<RecentPost[]> => {
   try {
     const response = await fetch('/api/recent-posts');
-    if (!response.ok) throw new Error('Failed to fetch recent posts');
-    const apiResponse: ApiResponse<RecentPost[]> = await response.json();
-    
-    if (!apiResponse.success) {
-      throw new Error(apiResponse.error || 'API request failed');
+    if (!response.ok) {
+      console.error(`Failed to fetch recent posts: ${response.statusText}`);
+      return [];
     }
-    
-    return apiResponse.data || [];
+    const apiResponse = await response.json();
+    if (!apiResponse.success || !Array.isArray(apiResponse.data)) {
+      console.error('Invalid or failed API response for recent posts:', apiResponse.error || 'Data is not an array');
+      return [];
+    }
+    return apiResponse.data;
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
       console.error('Error fetching recent posts:', error);
@@ -29,14 +31,16 @@ const fetchRecentPosts = async (): Promise<RecentPost[]> => {
 const fetchPopularPosts = async (): Promise<PopularPost[]> => {
   try {
     const response = await fetch('/api/popular-posts');
-    if (!response.ok) throw new Error('Failed to fetch popular posts');
-    const apiResponse: ApiResponse<PopularPost[]> = await response.json();
-    
-    if (!apiResponse.success) {
-      throw new Error(apiResponse.error || 'API request failed');
+    if (!response.ok) {
+      console.error(`Failed to fetch popular posts: ${response.statusText}`);
+      return [];
     }
-    
-    return apiResponse.data || [];
+    const apiResponse = await response.json();
+    if (!apiResponse.success || !Array.isArray(apiResponse.data)) {
+      console.error('Invalid or failed API response for popular posts:', apiResponse.error || 'Data is not an array');
+      return [];
+    }
+    return apiResponse.data;
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
       console.error('Error fetching popular posts:', error);
@@ -48,14 +52,16 @@ const fetchPopularPosts = async (): Promise<PopularPost[]> => {
 const fetchLinks = async (): Promise<LinkItem[]> => {
   try {
     const response = await fetch('/api/links');
-    if (!response.ok) throw new Error('Failed to fetch links');
-    const apiResponse: ApiResponse<LinkItem[]> = await response.json();
-    
-    if (!apiResponse.success) {
-      throw new Error(apiResponse.error || 'API request failed');
+    if (!response.ok) {
+      console.error(`Failed to fetch links: ${response.statusText}`);
+      return [];
     }
-    
-    return apiResponse.data || [];
+    const apiResponse = await response.json();
+    if (!apiResponse.success || !Array.isArray(apiResponse.data)) {
+      console.error('Invalid or failed API response for links:', apiResponse.error || 'Data is not an array');
+      return [];
+    }
+    return apiResponse.data;
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
       console.error('Error fetching links:', error);
@@ -81,11 +87,22 @@ function LeftSidebarComponent() {
       // Check if we have valid cached data
       const cachedData = cache.getCache('sidebar');
       if (cachedData && cache.isCacheValid('sidebar', CACHE_DURATION)) {
-        setRecentPosts(cachedData.recentPosts);
-        setPopularPosts(cachedData.popularPosts);
-        setLinks(cachedData.links);
-        setLoading(false);
-        return;
+        // Validate cached data structure before using it
+        if (
+          Array.isArray(cachedData.recentPosts) &&
+          Array.isArray(cachedData.popularPosts) &&
+          Array.isArray(cachedData.links)
+        ) {
+          setRecentPosts(cachedData.recentPosts);
+          setPopularPosts(cachedData.popularPosts);
+          setLinks(cachedData.links);
+          setLoading(false);
+          return;
+        } else {
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Sidebar cache data is corrupted. Refetching...');
+          }
+        }
       }
 
       setLoading(true);

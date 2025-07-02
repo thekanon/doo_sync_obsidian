@@ -1,26 +1,54 @@
 "use client";
-import React, { memo } from "react";
+import React, { memo, Suspense } from "react";
+import dynamic from "next/dynamic";
+import { usePreloader } from "../hooks/usePreloader";
+
+// Static imports for critical above-the-fold components
 import Header from "./Header";
 import Breadcrumbs from "./Breadcrumbs";
-import LeftSidebar from "./LeftSidebar";
-import CurrentDirectory from "./CurrentDirectory";
-import ScrollToTop from "./ScrollToTop";
-import { User } from "../types/user";
+
+// Dynamic imports for below-the-fold components with SSR support
+const LeftSidebar = dynamic(() => import("./LeftSidebar"), {
+  ssr: true,
+  loading: () => (
+    <div className="p-4 space-y-4">
+      <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+      <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+      <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+    </div>
+  )
+});
+
+const CurrentDirectory = dynamic(() => import("./CurrentDirectory"), {
+  ssr: true,
+  loading: () => (
+    <div className="p-4 space-y-2">
+      <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+      <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+      <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+    </div>
+  )
+});
+
+const ScrollToTop = dynamic(() => import("./ScrollToTop"), {
+  ssr: false
+});
 
 interface ClientLayoutProps {
-  user?: User;
   children: React.ReactNode;
 }
 
+// Memoized critical components
 const MemoizedHeader = memo(Header);
 const MemoizedBreadcrumbs = memo(Breadcrumbs);
-const MemoizedCurrentDirectory = memo(CurrentDirectory);
-const MemoizedLeftSidebar = memo(LeftSidebar);
 
-export default function ClientLayout({ user, children }: ClientLayoutProps) {
+export default function ClientLayout({ children }: ClientLayoutProps) {
+  // Preload critical data immediately on layout mount
+  usePreloader();
+  
   return (
     <>
-      <MemoizedHeader user={user} />
+      <MemoizedHeader />
       <MemoizedBreadcrumbs />
 
       {/* Main Layout Container */}
@@ -28,7 +56,15 @@ export default function ClientLayout({ user, children }: ClientLayoutProps) {
         {/* Left Sidebar - Desktop Only */}
         <div className="hidden lg:block flex-shrink-0">
           <div className="sticky top-0 h-screen overflow-y-auto">
-            <MemoizedCurrentDirectory />
+            <Suspense fallback={
+              <div className="p-4 space-y-2">
+                <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+              </div>
+            }>
+              <CurrentDirectory />
+            </Suspense>
           </div>
         </div>
 
@@ -39,7 +75,15 @@ export default function ClientLayout({ user, children }: ClientLayoutProps) {
             
             {/* Mobile Recent & Popular Posts - Below Content */}
             <div className="block xl:hidden mt-8 pt-6 border-t border-gray-200">
-              <MemoizedLeftSidebar />
+              <Suspense fallback={
+                <div className="p-4 space-y-4">
+                  <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                </div>
+              }>
+                <LeftSidebar />
+              </Suspense>
             </div>
           </div>
         </div>
@@ -47,7 +91,15 @@ export default function ClientLayout({ user, children }: ClientLayoutProps) {
         {/* Right Sidebar - Desktop Only */}
         <div className="hidden xl:block flex-shrink-0">
           <div className="sticky top-0 h-screen overflow-y-auto">
-            <MemoizedLeftSidebar />
+            <Suspense fallback={
+              <div className="p-4 space-y-4">
+                <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+              </div>
+            }>
+              <LeftSidebar />
+            </Suspense>
           </div>
         </div>
       </div>

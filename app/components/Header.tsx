@@ -7,13 +7,12 @@ import { AUTH_STATUS_MESSAGES } from "@/app/types/auth";
 import { debounce } from "es-toolkit";
 import dynamic from "next/dynamic";
 
+import { useUser } from "../contexts/UserContext";
+
 const SearchModal = dynamic(() => import("./SearchModal"), { ssr: false });
 
-interface HeaderProps {
-  user?: User;
-}
-
-const Header: React.FC<HeaderProps> = ({ user }) => {
+const Header: React.FC = () => {
+  const { user } = useUser();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
