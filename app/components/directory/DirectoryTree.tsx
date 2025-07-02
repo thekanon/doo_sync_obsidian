@@ -46,13 +46,16 @@ export default function DirectoryTree({
                 <button
                   onClick={() => onToggleDirectory(item.path)}
                   className={`mr-2 flex-shrink-0 ${
-                    item.isLocked
+                    item.isLocked || !item.children || item.children.length === 0
                       ? "text-gray-400 cursor-not-allowed"
                       : "text-gray-500 hover:text-gray-700"
                   }`}
-                  disabled={item.isLocked}
+                  disabled={item.isLocked || !item.children || item.children.length === 0}
                 >
-                  {expandedDirs.has(item.path) ? "▼" : "▶"}
+                  {item.children && item.children.length > 0 
+                    ? (expandedDirs.has(item.path) ? "▼" : "▶")
+                    : "•"
+                  }
                 </button>
                 <Link
                   href={item.isLocked ? "/unauthorized" : item.path}
@@ -99,7 +102,7 @@ export default function DirectoryTree({
               </>
             )}
           </div>
-          {item.isDirectory && expandedDirs.has(item.path) && item.children && !item.isLocked && (
+          {item.isDirectory && expandedDirs.has(item.path) && item.children && item.children.length > 0 && !item.isLocked && (
             <div>{renderDirectoryTree(item.children, level + 1)}</div>
           )}
         </div>
