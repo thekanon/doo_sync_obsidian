@@ -2,31 +2,52 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useMemo } from 'react'
 
 /**
  * 페이지 상단에서 현재 위치를 보여주는 브레드크럼 컴포넌트
  */
 export default function Breadcrumbs() {
   const pathname = usePathname()
-  const encodedSegments = pathname.split('/').filter(Boolean)
-
-  const decodedSegments = encodedSegments.map(decodeURIComponent)
-
-  // 마지막 세그먼트가 인덱스 파일인지 확인
-  const last = encodedSegments[encodedSegments.length - 1]
-
-  const isIndexFile = last?.startsWith('_Index_of_')
-
-  const ROOT_DIR = process.env.OBSIDIAN_ROOT_DIR || 'Root'
-  if (isIndexFile) {
+  
+  const breadcrumbData = useMemo(() => {
+    const encodedSegments = pathname.split('/').filter(Boolean)
+    const decodedSegments = encodedSegments.map(decodeURIComponent)
+    
+    // 마지막 세그먼트가 인덱스 파일인지 확인
+    const last = encodedSegments[encodedSegments.length - 1]
+    const isIndexFile = last?.startsWith('_Index_of_')
+    
+    const ROOT_DIR = process.env.OBSIDIAN_ROOT_DIR || 'Root'
+    
     // 루트 인덱스라면 브래드크럼을 표시하지 않음
-    if (last === `_Index_of_${ROOT_DIR}.md`) {
-      return null
+    if (isIndexFile && last === `_Index_of_${ROOT_DIR}.md`) {
+      return { shouldRender: false, segments: [], encodedSegments: [], isIndexFile: false, last: '' }
     }
-    // 인덱스 파일 세그먼트 제거
-    encodedSegments.pop()
-    decodedSegments.pop()
+    
+    const processedEncodedSegments = [...encodedSegments]
+    const processedDecodedSegments = [...decodedSegments]
+    
+    if (isIndexFile) {
+      // 인덱스 파일 세그먼트 제거
+      processedEncodedSegments.pop()
+      processedDecodedSegments.pop()
+    }
+    
+    return {
+      shouldRender: true,
+      segments: processedDecodedSegments,
+      encodedSegments: processedEncodedSegments,
+      isIndexFile,
+      last
+    }
+  }, [pathname])
+  
+  if (!breadcrumbData.shouldRender) {
+    return null
   }
+
+  const { segments: decodedSegments, encodedSegments, isIndexFile, last } = breadcrumbData
 
   return (
     <nav aria-label="Breadcrumb" className="text-sm text-gray-600 px-4 py-2">

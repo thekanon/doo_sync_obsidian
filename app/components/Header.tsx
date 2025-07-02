@@ -2,18 +2,17 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { User, UserRole } from "../types/user";
+import { UserRole } from "../types/user";
 import { AUTH_STATUS_MESSAGES } from "@/app/types/auth";
 import { debounce } from "es-toolkit";
 import dynamic from "next/dynamic";
 
+import { useUser } from "../contexts/UserContext";
+
 const SearchModal = dynamic(() => import("./SearchModal"), { ssr: false });
 
-interface HeaderProps {
-  user?: User;
-}
-
-const Header: React.FC<HeaderProps> = ({ user }) => {
+const Header: React.FC = () => {
+  const { user } = useUser();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isSearchOpen, setIsSearchOpen] = useState(false);

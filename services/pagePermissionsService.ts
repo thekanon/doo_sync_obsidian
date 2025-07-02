@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 import { logger } from '@/app/lib/logger';
 import { UserRole } from '@/app/types/user';
 
@@ -19,7 +18,7 @@ let lastModified: number = 0;
  */
 export function readPagePermissions(filePath?: string): PagePermission[] {
   const permissionsFile = filePath || process.env.PAGE_PERMISSIONS_FILE || 'config/page-permissions.json';
-  const fullPath = path.resolve(permissionsFile);
+  const fullPath = permissionsFile.startsWith('/') ? permissionsFile : `./${permissionsFile}`;
 
   try {
     // Check if file exists

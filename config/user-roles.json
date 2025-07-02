@@ -1,0 +1,19 @@
+{
+  "admins": [
+    "admin@example.com"
+  ],
+  "verifiedUsers": [
+    "user1@example.com",
+    "user2@example.com"
+  ],
+  "blockedUsers": [
+    "blocked@example.com"
+  ],
+  "settings": {
+    "autoVerifyEmailDomains": [
+      "@yourcompany.com"
+    ],
+    "maxAnonymousVisits": 10,
+    "defaultRole": "GUEST"
+  }
+}

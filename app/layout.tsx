@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
+import { CacheProvider } from "./contexts/CacheContext";
+import { UserProvider } from "./contexts/UserContext";
+import { getServerUser } from "./lib/utils";
+import ClientLayout from "./components/ClientLayout";
 
 // Skip validation during build time
 if (typeof window === 'undefined' && process.env.NODE_ENV !== 'production' && (!process.env.SITE_NAME || !process.env.SITE_URL || !process.env.SITE_AUTHOR)) {
@@ -30,15 +34,21 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const user = await getServerUser();
+
   return (
     <html lang="en">
       <body
         className={`${GeistSans.className} ${GeistMono.className} antialiased leading-relaxed text-gray-900 bg-white`}
       >
-        {children}
+        <CacheProvider>
+          <UserProvider initialUser={user || undefined}>
+            <ClientLayout>{children}</ClientLayout>
+          </UserProvider>
+        </CacheProvider>
       </body>
     </html>
   );
