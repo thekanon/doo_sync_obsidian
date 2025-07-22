@@ -1,0 +1,158 @@
+# Docker build optimization and security exclusions
+# Reduces build context and improves security by excluding sensitive files
+
+# ===== Dependencies =====
+node_modules
+.pnpm-store
+*.tgz
+
+# ===== Build outputs =====
+.next
+out
+dist
+build
+coverage
+
+# ===== Development files =====
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Hot reload and development cache
+.next/cache
+.swc
+
+# ===== IDE and editor files =====
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# ===== Version control =====
+.git
+.gitignore
+.gitattributes
+
+# ===== Documentation =====
+README.md
+CHANGELOG.md
+CONTRIBUTING.md
+LICENSE
+docs
+*.md
+
+# ===== Testing =====
+tests
+test
+**/*.test.js
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.js
+**/*.spec.ts
+**/*.spec.tsx
+jest.config.js
+cypress.config.js
+
+# ===== Logs and runtime files =====
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# ===== OS generated files =====
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===== Temporary files =====
+tmp
+temp
+*.tmp
+*.temp
+
+# ===== ESLint and formatting =====
+.eslintcache
+.prettier*
+
+# ===== TypeScript =====
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# ===== Docker files (avoid recursion) =====
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# ===== Deployment and CI files =====
+.github
+.gitlab-ci.yml
+.travis.yml
+.circleci
+azure-pipelines.yml
+Jenkinsfile
+.gitpod.yml
+.codeclimate.yml
+
+# ===== Security and secrets =====
+.env
+.env.*
+secrets
+*.pem
+*.key
+*.p12
+*.pfx
+
+# ===== Package manager lock files (keep only pnpm) =====
+package-lock.json
+yarn.lock
+
+# ===== Storybook =====
+.storybook
+storybook-static
+
+# ===== Local configuration overrides =====
+config/local.json
+config/*.local.*
+
+# ===== Backup files =====
+*.backup
+*.bak
+*.orig
+
+# ===== Coverage reports =====
+coverage
+.nyc_output
+
+# ===== Vercel deployment =====
+.vercel
+
+# ===== Firebase =====
+.firebase
+.firebaserc.local
+
+# ===== Database files =====
+*.db
+*.sqlite
+*.sqlite3
+
+# ===== Obsidian vault (should be mounted as volume) =====
+obsidian-vault
+
+# ===== PM2 ecosystem files =====
+ecosystem.config.js
+ecosystem.config.json

@@ -1,0 +1,52 @@
+# Development Dockerfile for DooSyncBrain Obsidian Wiki
+# Optimized for hot reload and development workflow
+
+FROM node:18-alpine AS dev
+
+# Install system dependencies
+RUN apk add --no-cache \
+    git \
+    curl \
+    openssh-client \
+    && rm -rf /var/cache/apk/*
+
+# Enable pnpm package manager
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+WORKDIR /app
+
+# Copy package files for dependency installation
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies with development tools
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm install
+
+# Development environment configuration
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV WATCHPACK_POLLING=true
+ENV FAST_REFRESH=true
+
+# Create non-root user for security
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# Create directories and set permissions
+RUN mkdir -p /app/logs /obsidian && \
+    chown -R nextjs:nodejs /app /obsidian
+
+# Switch to non-root user
+USER nextjs
+
+# Expose development port
+EXPOSE 33000
+
+# Health check for development
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
+    CMD curl -f http://localhost:33000 || exit 1
+
+# Start development server with hot reload
+CMD ["pnpm", "dev"]
