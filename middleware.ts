@@ -11,6 +11,40 @@ import {
 } from "@/app/lib/utils";
 import { isPublicPageList } from "@/app/types/pagePermissions";
 
+// Common security headers configuration
+const SECURITY_HEADERS = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'X-XSS-Protection': '1; mode=block',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+};
+
+const CSP_VALUES = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' *.firebaseapp.com *.googleapis.com",
+  "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
+  "font-src 'self' fonts.gstatic.com",
+  "img-src 'self' data: blob:",
+  "connect-src 'self' *.firebase.com *.firebaseio.com *.googleapis.com",
+  "frame-ancestors 'none'",
+  "base-uri 'self'"
+].join('; ');
+
+function addSecurityHeaders(response: NextResponse) {
+  // Add common security headers
+  Object.entries(SECURITY_HEADERS).forEach(([key, value]) => {
+    response.headers.set(key, value);
+  });
+  
+  // HSTS for production
+  if (process.env.NODE_ENV === 'production') {
+    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
+  
+  // Content Security Policy
+  response.headers.set('Content-Security-Policy', CSP_VALUES);
+}
+
 export async function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   const path = request.nextUrl.pathname;
@@ -22,6 +56,8 @@ export async function middleware(request: NextRequest) {
       headers: requestHeaders,
     },
   });
+  
+  addSecurityHeaders(response);
 
   // 공개 리소스는 체크하지 않음
   if (path.match(/\.(ico|png|jpg|jpeg|css|js|svg)$/)) {
@@ -60,12 +96,14 @@ export async function middleware(request: NextRequest) {
   }
   logger.debug("👮‍♂️ permission check");
 
-  // 새로운 response 객체 생성
+  // 새로운 response 객체 생성 with security headers
   const finalResponse = NextResponse.next({
     request: {
       headers: requestHeaders,
     },
   });
+  
+  addSecurityHeaders(finalResponse);
   logger.debug("🚀 middleware");
   // 방문 횟수 초기화
   const resetResponse = await resetVisitCount(requestHeaders);

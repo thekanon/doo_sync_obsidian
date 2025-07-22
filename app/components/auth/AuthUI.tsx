@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { firebase } from "@/app/lib/auth/firebaseConfig";
 import * as firebaseui from "firebaseui";
+
 import "firebaseui/dist/firebaseui.css";
 
 interface AuthUIProps {

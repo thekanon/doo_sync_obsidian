@@ -7,8 +7,23 @@ export interface ApiResponse<T> {
     limit?: number;
     currentPath?: string;
   };
-  error?: string;
+  error?: ApiErrorResponse;
   success: boolean;
+}
+
+export enum ApiErrorCode {
+  UNAUTHORIZED = 'UNAUTHORIZED',
+  FORBIDDEN = 'FORBIDDEN',
+  NOT_FOUND = 'NOT_FOUND',
+  VALIDATION_ERROR = 'VALIDATION_ERROR',
+  RATE_LIMITED = 'RATE_LIMITED',
+  INTERNAL_ERROR = 'INTERNAL_ERROR'
+}
+
+export interface ApiErrorResponse {
+  code: ApiErrorCode;
+  message: string;
+  details?: Record<string, unknown>;
 }
 
 export interface ApiError extends Error {
