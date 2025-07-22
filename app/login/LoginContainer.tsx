@@ -1,8 +1,6 @@
 "use client";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import firebase from "firebase/compat/app";
 import * as firebaseui from "firebaseui";
-import "firebase/compat/auth";
 import { logger } from "@/app/lib/logger";
 import {
   handleAuthentication,
@@ -11,21 +9,7 @@ import {
 import "firebaseui/dist/firebaseui.css";
 import { useRouter } from "next/navigation";
 import { getAuthStatus } from "@/app/lib/common";
-
-// Firebase 구성 추가
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
-
-// Firebase 앱 초기화
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
+import { firebase } from "@/app/lib/auth/firebaseConfig";
 
 const LoginPage = () => {
   const [user, setUser] = useState<firebase.User | null>(null);

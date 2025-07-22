@@ -15,7 +15,7 @@ interface ContentRendererProps {
   directoryFiles?: DirectoryFile[];
 }
 
-export default function ContentRenderer({
+export default React.memo(function ContentRenderer({
   content,
   path,
   role,
@@ -32,7 +32,7 @@ export default function ContentRenderer({
     directoryFiles,
   });
 
-  const fileTitle = getFileTitle(path);
+  const fileTitle = React.useMemo(() => getFileTitle(path), [path]);
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">
@@ -103,4 +103,4 @@ export default function ContentRenderer({
       </div>
     </div>
   );
-}
+});

@@ -72,6 +72,9 @@ async function loadDirectoryContents(dirPath: string, userRole: UserRole, rootDi
   return items;
 }
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function GET(request: NextRequest) {
   try {
     // Get the current path from query parameters
@@ -79,12 +82,21 @@ export async function GET(request: NextRequest) {
     const currentPath = searchParams.get('path') || '';
     const loadTree = searchParams.get('tree') === 'true';
     
+    // Set cache headers for performance
+    const headers = {
+      'Cache-Control': 's-maxage=30, stale-while-revalidate=60',
+      'Content-Type': 'application/json',
+    };
+    
     const repoPath = process.env.REPO_PATH || '';
     const rootDirName = process.env.OBSIDIAN_ROOT_DIR || 'Root';
     const rootDir = path.join(repoPath, rootDirName);
     
     if (!repoPath || !fs.existsSync(rootDir)) {
-      return NextResponse.json({ error: 'Root directory not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Root directory not found' }, { 
+      status: 404,
+      headers: { 'Cache-Control': 'no-cache' }
+    });
     }
 
     // Get current user to check permissions
@@ -115,7 +127,10 @@ export async function GET(request: NextRequest) {
     }
     
     if (!fs.existsSync(directoryToScan)) {
-      return NextResponse.json({ error: 'Directory not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Directory not found' }, { 
+      status: 404,
+      headers: { 'Cache-Control': 'no-cache' }
+    });
     }
 
     // Load directory contents with or without tree structure
@@ -129,9 +144,12 @@ export async function GET(request: NextRequest) {
       items,
       currentPath: relativePath || rootDirName,
       totalCount: items.length
-    });
+    }, { headers });
   } catch (error) {
     console.error('Error getting current directory:', error);
-    return NextResponse.json({ error: 'Failed to get current directory' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to get current directory' }, { 
+      status: 500,
+      headers: { 'Cache-Control': 'no-cache' }
+    });
   }
 }
