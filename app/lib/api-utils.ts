@@ -26,7 +26,10 @@ export function createErrorResponse(
   const apiError: ApiErrorResponse = {
     code: errorCode,
     message,
-    details: error instanceof Error ? { stack: error.stack } : undefined
+    details:
+    process.env.NODE_ENV === 'development' && error instanceof Error
+        ? { stack: error.stack }
+        : undefined,
   };
   
   return NextResponse.json(
@@ -63,7 +66,8 @@ export function validateRequiredFields(
   obj: Record<string, unknown>,
   requiredFields: string[]
 ): string[] {
-  const missing = requiredFields.filter(field => !obj[field]);
+  const missing = requiredFields.filter(field => obj[field] == null);
+
   return missing;
 }
 
