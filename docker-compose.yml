@@ -1,0 +1,173 @@
+# Docker Compose configuration for DooSyncBrain Obsidian Wiki
+# Supports both development and production environments
+
+version: '3.8'
+
+services:
+  # Main application service
+  doo-wiki:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: ${BUILD_TARGET:-runner}
+    image: doo-sync-obsidian:${VERSION:-latest}
+    container_name: doo-wiki-app
+    ports:
+      - "${HOST_PORT:-33000}:33000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=33000
+      - HOSTNAME=0.0.0.0
+      # Application configuration
+      - SITE_NAME=${SITE_NAME:-DooWiki}
+      - SITE_URL=${SITE_URL:-https://doowiki.site}
+      - SITE_AUTHOR=${SITE_AUTHOR:-DooDeveloper}
+      - OBSIDIAN_URL=${OBSIDIAN_URL:-obsidian}
+      - OBSIDIAN_ROOT_DIR=${OBSIDIAN_ROOT_DIR:-Root}
+      # Firebase client configuration
+      - NEXT_PUBLIC_FIREBASE_API_KEY=${NEXT_PUBLIC_FIREBASE_API_KEY}
+      - NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}
+      - NEXT_PUBLIC_FIREBASE_PROJECT_ID=${NEXT_PUBLIC_FIREBASE_PROJECT_ID}
+      - NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}
+      - NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}
+      - NEXT_PUBLIC_FIREBASE_APP_ID=${NEXT_PUBLIC_FIREBASE_APP_ID}
+      - NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=${NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID}
+      - NEXT_PUBLIC_ADMIN_EMAIL=${NEXT_PUBLIC_ADMIN_EMAIL}
+      # Server configuration paths (container paths)
+      - REPO_PATH=/obsidian
+    volumes:
+      # Mount Obsidian vault (adjust path as needed)
+      - ${OBSIDIAN_VAULT_PATH:-./obsidian-vault}:/obsidian:rw
+      # Application logs
+      - app-logs:/app/logs
+      # Configuration files
+      - ./config:/app/config:ro
+    networks:
+      - doo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:33000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    depends_on:
+      - redis
+    labels:
+      - "com.doo.service=wiki"
+      - "com.doo.version=${VERSION:-latest}"
+      # Traefik labels for reverse proxy (optional)
+      - "traefik.enable=${TRAEFIK_ENABLE:-false}"
+      - "traefik.http.routers.doo-wiki.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.services.doo-wiki.loadbalancer.server.port=33000"
+
+  # Redis for distributed caching and rate limiting
+  redis:
+    image: redis:7-alpine
+    container_name: doo-wiki-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+      - ./config/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - doo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+
+  # Nginx reverse proxy (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: doo-wiki-nginx
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./config/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./config/ssl:/etc/nginx/ssl:ro
+      - nginx-logs:/var/log/nginx
+    depends_on:
+      - doo-wiki
+    networks:
+      - doo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - proxy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 32M
+
+  # Development services (only active with --profile dev)
+  doo-wiki-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: doo-wiki-dev
+    ports:
+      - "33000:33000"
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+      - FAST_REFRESH=true
+    volumes:
+      # Hot reload support
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+      # Mount Obsidian vault
+      - ${OBSIDIAN_VAULT_PATH:-./obsidian-vault}:/obsidian:rw
+    env_file:
+      - .env.local
+    networks:
+      - doo-network
+    profiles:
+      - dev
+    restart: unless-stopped
+
+# Named volumes for persistent data
+volumes:
+  redis-data:
+    driver: local
+  app-logs:
+    driver: local
+  nginx-logs:
+    driver: local
+
+# Custom network for service isolation
+networks:
+  doo-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
