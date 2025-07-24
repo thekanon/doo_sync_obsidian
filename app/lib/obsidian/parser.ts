@@ -18,25 +18,7 @@ export function parseHtmlToReact(
   createdAt?: string,
   directoryFiles?: DirectoryFile[]
 ): React.ReactNode {
-  // HTML 엔티티를 원래 문자로 디코딩
-  const decodedHtml = html
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
-    
-  // HTML 엔티티 디코딩을 방지하는 옵션 설정
-  const root = parse(decodedHtml, {
-    lowerCaseTagName: false,
-    comment: false,
-    blockTextElements: {
-      script: true,
-      noscript: true,
-      style: true,
-      pre: true, // pre 태그 내부 텍스트를 그대로 유지
-    }
-  });
+  const root = parse(html);
   const decodedPath = decodeURIComponent(path);
   const isIndexPage =
     decodedPath
