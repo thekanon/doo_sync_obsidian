@@ -1,0 +1,20 @@
+# Docker Compose override for local development
+# Automatically loaded when running docker-compose in development
+
+version: '3.8'
+
+services:
+  doo-wiki:
+    build:
+      dockerfile: Dockerfile.dev
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+    volumes:
+      # Mount source code for hot reload
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    env_file:
+      - .env.local
+    profiles: []  # Always active in development
