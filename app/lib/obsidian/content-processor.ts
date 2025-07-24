@@ -2,8 +2,9 @@ import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
 
 export function sanitizeHtml(html: string): string {
-  const window = new JSDOM("").window;
-  const purify = DOMPurify(window);
+  const dom = new JSDOM("<!DOCTYPE html>");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const purify = DOMPurify(dom.window as any);
   return purify.sanitize(html);
 }
 
