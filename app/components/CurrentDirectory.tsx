@@ -6,6 +6,8 @@ import DirectoryTree from "@/app/components/directory/DirectoryTree";
 import DirectoryLoader from "@/app/components/directory/DirectoryLoader";
 
 function CurrentDirectoryComponent() {
+  console.log('CurrentDirectory component mounted!'); // Debug log
+  
   const {
     expandedDirs,
     currentDirItems,

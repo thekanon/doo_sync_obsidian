@@ -2,6 +2,9 @@ import { NextRequest } from 'next/server';
 import { createErrorResponse, createSuccessResponse } from '../../lib/api-utils';
 import { getSpecialPageItems } from '../../../services/specialPagesService';
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

@@ -27,18 +27,27 @@ const nextConfig = {
           vendor: {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendors',
-            chunks: 'all',
+            chunks: (chunk) => {
+              // Edge Runtime chunks는 vendor 번들링에서 제외
+              return chunk.name !== 'middleware' && !chunk.name?.includes('edge');
+            },
             priority: 10,
           },
           firebase: {
             test: /[\\/]node_modules[\\/](firebase|firebaseui)[\\/]/,
             name: 'firebase',
-            chunks: 'all',
+            chunks: (chunk) => {
+              // Edge Runtime chunks는 firebase 번들링에서 제외
+              return chunk.name !== 'middleware' && !chunk.name?.includes('edge');
+            },
             priority: 20,
           },
           commons: {
             name: 'commons',
-            chunks: 'all',
+            chunks: (chunk) => {
+              // Edge Runtime chunks는 commons 번들링에서 제외
+              return chunk.name !== 'middleware' && !chunk.name?.includes('edge');
+            },
             minChunks: 2,
             priority: 5,
           },

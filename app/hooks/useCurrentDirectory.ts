@@ -27,9 +27,15 @@ export function useCurrentDirectory() {
     const currentDirectory = pathname.split('/').slice(0, -1).join('/') || '/';
     const cacheKey = currentDirectory;
     
+    console.log('useCurrentDirectory - pathname:', pathname); // Debug log
+    console.log('useCurrentDirectory - currentDirectory:', currentDirectory); // Debug log
+    console.log('useCurrentDirectory - cacheKey:', cacheKey); // Debug log
+    
     // Check if we have valid cached data
     const cachedItems = cache.getDirectoryCache(cacheKey);
+    console.log('useCurrentDirectory - cachedItems:', cachedItems); // Debug log
     if (cachedItems && cache.isCacheValid('directories', CACHE_DURATION, cacheKey)) {
+      console.log('useCurrentDirectory - using cached data:', cachedItems); // Debug log
       setCurrentDirItems(cachedItems);
       return;
     }
@@ -48,6 +54,9 @@ export function useCurrentDirectory() {
             return;
           }
         }
+        
+        // Special handling: Always fetch directory contents for _Index_ files
+        // This ensures the file tree is populated even when no special pages exist
 
         // Call the API to get current directory contents with tree structure
         const response = await fetch(
@@ -62,7 +71,9 @@ export function useCurrentDirectory() {
         }
 
         const data = await response.json();
+        console.log('Current directory response:', data); // Debug log
         const items = data.items || [];
+        console.log('Setting current dir items:', items); // Debug log
         setCurrentDirItems(items);
         
         // Cache the result globally

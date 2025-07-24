@@ -89,6 +89,8 @@ function LeftSidebarComponent() {
       if (cachedData && cache.isCacheValid('sidebar', CACHE_DURATION)) {
         // Validate cached data structure before using it
         if (
+          cachedData &&
+          typeof cachedData === 'object' &&
           Array.isArray(cachedData.recentPosts) &&
           Array.isArray(cachedData.popularPosts) &&
           Array.isArray(cachedData.links)
@@ -99,8 +101,10 @@ function LeftSidebarComponent() {
           setLoading(false);
           return;
         } else {
+          // Clear corrupted cache data
+          cache.clearCache('sidebar');
           if (process.env.NODE_ENV === 'development') {
-            console.warn('Sidebar cache data is corrupted. Refetching...');
+            console.warn('Sidebar cache data is corrupted. Clearing cache and refetching...', cachedData);
           }
         }
       }

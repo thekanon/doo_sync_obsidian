@@ -41,7 +41,25 @@ export function CacheProvider({ children }: CacheProviderProps) {
   const cacheRef = useRef<CacheData>({});
 
   const getCache = <T extends keyof CacheData>(key: T): CacheData[T] | null => {
-    return cacheRef.current[key] || null;
+    const cachedData = cacheRef.current[key];
+    
+    // Validate sidebar cache structure
+    if (key === 'sidebar' && cachedData) {
+      const sidebarData = cachedData as SidebarData;
+      if (
+        !sidebarData ||
+        typeof sidebarData !== 'object' ||
+        !Array.isArray(sidebarData.recentPosts) ||
+        !Array.isArray(sidebarData.popularPosts) ||
+        !Array.isArray(sidebarData.links)
+      ) {
+        // Clear corrupted cache
+        delete cacheRef.current[key];
+        return null;
+      }
+    }
+    
+    return cachedData || null;
   };
 
   const setCache = <T extends keyof CacheData>(key: T, data: CacheData[T]) => {

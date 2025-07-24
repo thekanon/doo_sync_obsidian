@@ -9,7 +9,6 @@ import {
   resetVisitCount,
   handleVisitCount,
 } from "@/app/lib/utils";
-import { isPublicPageList } from "@/app/types/pagePermissions";
 
 // Common security headers configuration
 const SECURITY_HEADERS = {
@@ -19,16 +18,33 @@ const SECURITY_HEADERS = {
   'Referrer-Policy': 'strict-origin-when-cross-origin',
 };
 
-const CSP_VALUES = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' *.firebaseapp.com *.googleapis.com",
-  "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
-  "font-src 'self' fonts.gstatic.com",
-  "img-src 'self' data: blob:",
-  "connect-src 'self' *.firebase.com *.firebaseio.com *.googleapis.com",
-  "frame-ancestors 'none'",
-  "base-uri 'self'"
-].join('; ');
+// CSP configuration based on environment
+// Development: Needs 'unsafe-eval' for Hot Reload
+// Production: May need 'unsafe-eval' for dynamic imports, but prefer nonce-based approach
+const getCSPValues = () => {
+  const baseCSP = [
+    "default-src 'self'",
+    "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
+    "font-src 'self' fonts.gstatic.com",
+    "img-src 'self' data: blob:",
+    "connect-src 'self' *.firebase.com *.firebaseio.com *.googleapis.com",
+    "frame-ancestors 'none'",
+    "base-uri 'self'"
+  ];
+
+  if (process.env.NODE_ENV === 'development') {
+    // Development: Full permissions for hot reload
+    baseCSP.push("script-src 'self' 'unsafe-inline' 'unsafe-eval' *.firebaseapp.com *.googleapis.com local.adguard.org");
+  } else {
+    // Production: Strict CSP, but allow 'unsafe-eval' if needed for Next.js
+    // Consider using nonce-based CSP in the future for better security
+    baseCSP.push("script-src 'self' 'unsafe-inline' 'unsafe-eval' *.firebaseapp.com *.googleapis.com");
+  }
+
+  return baseCSP.join('; ');
+};
+
+const CSP_VALUES = getCSPValues();
 
 function addSecurityHeaders(response: NextResponse) {
   // Add common security headers
