@@ -99,8 +99,8 @@ export default function DirectoryTree({
               </>
             )}
           </div>
-          {item.isDirectory && expandedDirs.has(item.path) && item.children && !item.isLocked && (
-            <div>{renderDirectoryTree(item.children, level + 1)}</div>
+          {item.isDirectory && expandedDirs.has(item.path) && !item.isLocked && (
+            <div>{renderDirectoryTree(getChildItems(item), level + 1)}</div>
           )}
         </div>
       );
