@@ -9,7 +9,6 @@ import {
   resetVisitCount,
   handleVisitCount,
 } from "@/app/lib/utils";
-import { isPublicPageList } from "@/app/types/pagePermissions";
 
 // Common security headers configuration
 const SECURITY_HEADERS = {

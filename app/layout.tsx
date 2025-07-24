@@ -7,6 +7,12 @@ import { UserProvider } from "./contexts/UserContext";
 import { getServerUser } from "./lib/utils";
 import ClientLayout from "./components/ClientLayout";
 
+
+// Force dynamic rendering for this layout
+// 전체 앱이 동적 렌더링으로 설정되어야 함.
+
+export const dynamic = 'force-dynamic';
+
 // Skip validation during build time
 if (typeof window === 'undefined' && process.env.NODE_ENV !== 'production' && (!process.env.SITE_NAME || !process.env.SITE_URL || !process.env.SITE_AUTHOR)) {
   console.warn('Required environment variables are missing: SITE_NAME, SITE_URL, SITE_AUTHOR');
