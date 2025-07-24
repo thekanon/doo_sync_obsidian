@@ -10,66 +10,6 @@ interface DirectoryItem {
   isDirectory: boolean;
   modifiedAt: string;
   isLocked?: boolean;
-  children?: DirectoryItem[];
-}
-
-async function loadDirectoryContents(dirPath: string, userRole: UserRole, rootDir: string): Promise<DirectoryItem[]> {
-  const entries = await fs.promises.readdir(dirPath, { withFileTypes: true });
-  const items: DirectoryItem[] = [];
-  
-  for (const entry of entries) {
-    // Skip hidden files and _Index_of_ files
-    if (entry.name.startsWith('.') || entry.name.includes('_Index_of_')) continue;
-    
-    const fullPath = path.join(dirPath, entry.name);
-    const relativePath = path.relative(rootDir, fullPath);
-    const itemPathForPermission = `/${relativePath}`;
-    
-    // Check permissions
-    const hasAccess = hasPermission(userRole, itemPathForPermission);
-    
-    // Get file stats
-    const stats = await fs.promises.stat(fullPath);
-    
-    if (entry.isDirectory()) {
-      // For directories, load children if they have access
-      let children: DirectoryItem[] = [];
-      if (hasAccess) {
-        try {
-          children = await loadDirectoryContents(fullPath, userRole, rootDir);
-        } catch (error) {
-          console.warn(`Failed to load children for ${fullPath}:`, error);
-        }
-      }
-      
-      const indexPath = `${itemPathForPermission}/_Index_of_${entry.name}.md`;
-      items.push({
-        name: entry.name,
-        path: indexPath,
-        isDirectory: true,
-        modifiedAt: stats.mtime.toISOString(),
-        isLocked: !hasAccess,
-        children: children
-      });
-    } else if (entry.name.endsWith('.md')) {
-      items.push({
-        name: entry.name.replace('.md', ''),
-        path: itemPathForPermission,
-        isDirectory: false,
-        modifiedAt: stats.mtime.toISOString(),
-        isLocked: !hasAccess
-      });
-    }
-  }
-  
-  // Sort items: directories first, then files, then by name
-  items.sort((a, b) => {
-    if (a.isDirectory && !b.isDirectory) return -1;
-    if (!a.isDirectory && b.isDirectory) return 1;
-    return a.name.localeCompare(b.name);
-  });
-  
-  return items;
 }
 
 export async function GET(request: NextRequest) {
@@ -77,7 +17,6 @@ export async function GET(request: NextRequest) {
     // Get the current path from query parameters
     const { searchParams } = new URL(request.url);
     const currentPath = searchParams.get('path') || '';
-    const loadTree = searchParams.get('tree') === 'true';
     
     const repoPath = process.env.REPO_PATH || '';
     const rootDirName = process.env.OBSIDIAN_ROOT_DIR || 'Root';
@@ -118,12 +57,52 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Directory not found' }, { status: 404 });
     }
 
-    // Load directory contents with or without tree structure
-    const items = loadTree 
-      ? await loadDirectoryContents(directoryToScan, userRole, rootDir)
-      : await loadDirectoryContents(directoryToScan, userRole, rootDir).then(items => 
-          items.map(item => ({ ...item, children: undefined }))
-        );
+    // Read the directory contents
+    const entries = await fs.promises.readdir(directoryToScan, { withFileTypes: true });
+    const items: DirectoryItem[] = [];
+    
+    for (const entry of entries) {
+      // Skip hidden files and _Index_of_ files
+      if (entry.name.startsWith('.') || entry.name.includes('_Index_of_')) continue;
+      
+      const fullPath = path.join(directoryToScan, entry.name);
+      const itemRelativePath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
+      const itemPathForPermission = `/${itemRelativePath}`;
+      
+      // Check permissions - now include locked items instead of filtering them out
+      const hasAccess = hasPermission(userRole, itemPathForPermission);
+      
+      
+      // Get file stats
+      const stats = await fs.promises.stat(fullPath);
+      
+      if (entry.isDirectory()) {
+        // For directories, create path to their index file
+        const indexPath = `${itemPathForPermission}/_Index_of_${entry.name}.md`;
+        items.push({
+          name: entry.name,
+          path: indexPath,
+          isDirectory: true,
+          modifiedAt: stats.mtime.toISOString(),
+          isLocked: !hasAccess
+        });
+      } else if (entry.name.endsWith('.md')) {
+        items.push({
+          name: entry.name.replace('.md', ''),
+          path: itemPathForPermission,
+          isDirectory: false,
+          modifiedAt: stats.mtime.toISOString(),
+          isLocked: !hasAccess
+        });
+      }
+    }
+    
+    // Sort items: directories first, then files, then by name
+    items.sort((a, b) => {
+      if (a.isDirectory && !b.isDirectory) return -1;
+      if (!a.isDirectory && b.isDirectory) return 1;
+      return a.name.localeCompare(b.name);
+    });
     
     return NextResponse.json({ 
       items,

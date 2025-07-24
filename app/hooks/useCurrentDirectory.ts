@@ -49,9 +49,9 @@ export function useCurrentDirectory() {
           }
         }
 
-        // Call the API to get current directory contents with tree structure
+        // Call the API to get current directory contents
         const response = await fetch(
-          `/api/current-directory?path=${encodeURIComponent(pathname)}&tree=true`
+          `/api/current-directory?path=${encodeURIComponent(pathname)}`
         );
 
         if (!response.ok) {
