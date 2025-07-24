@@ -15,6 +15,10 @@ export default function DirectoryTree({
   pathname,
   onToggleDirectory,
 }: DirectoryTreeProps) {
+  const getChildItems = (item: DirectoryItem): DirectoryItem[] => {
+    return item.children || [];
+  };
+
   const renderDirectoryTree = (items: DirectoryItem[], level = 0) => {
     const currentPath = pathname
       ? decodeURIComponent(

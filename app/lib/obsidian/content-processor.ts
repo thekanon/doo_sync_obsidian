@@ -4,7 +4,7 @@ import { JSDOM } from "jsdom";
 export function sanitizeHtml(html: string): string {
   const dom = new JSDOM("<!DOCTYPE html>");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const purify = DOMPurify(dom.window as Window);
+  const purify = DOMPurify(dom.window as any);
   return purify.sanitize(html);
 }
 
