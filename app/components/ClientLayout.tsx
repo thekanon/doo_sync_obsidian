@@ -43,6 +43,8 @@ const MemoizedHeader = memo(Header);
 const MemoizedBreadcrumbs = memo(Breadcrumbs);
 
 export default function ClientLayout({ children }: ClientLayoutProps) {
+  console.log('ClientLayout mounted!'); // Debug log
+  
   // Preload critical data immediately on layout mount
   usePreloader();
   
