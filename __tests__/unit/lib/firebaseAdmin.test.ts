@@ -30,7 +30,7 @@ test('Firebase Admin SDK 초기화 테스트', async (t) => {
   
   await t.test('정상적인 초기화', async () => {
     // Firebase Admin 모듈을 동적으로 임포트하여 모킹 적용
-    const module = await import('../../../app/lib/firebaseAdmin');
+    const module = await import('../../../app/lib/firebaseAdmin.js');
     
     // getApps가 빈 배열을 반환하도록 모킹 (첫 번째 초기화)
     const originalGetApps = (global as any).getApps;
@@ -55,7 +55,7 @@ test('Firebase Admin SDK 초기화 테스트', async (t) => {
     (process.env as any).FIREBASE_PRIVATE_KEY = undefined;
     
     try {
-      const module = await import('../../../app/lib/firebaseAdmin');
+      const module = await import('../../../app/lib/firebaseAdmin.js');
       
       await assert.rejects(
         async () => module.initializeFirebaseAdmin(),
@@ -74,7 +74,7 @@ test('토큰 검증 테스트 (deprecated 함수)', async (t) => {
   
   await t.test('유효한 토큰 검증', async () => {
     try {
-      const module = await import('../../../app/lib/firebaseAdmin');
+      const module = await import('../../../app/lib/firebaseAdmin.js');
       
       // Mock auth.verifyIdToken
       const result = await module.verifyToken('valid-token');
@@ -90,7 +90,7 @@ test('토큰 검증 테스트 (deprecated 함수)', async (t) => {
 
   await t.test('무효한 토큰 처리', async () => {
     try {
-      const module = await import('../../../app/lib/firebaseAdmin');
+      const module = await import('../../../app/lib/firebaseAdmin.js');
       
       const result = await module.verifyToken('invalid-token');
       
@@ -108,7 +108,7 @@ test('토큰 검증 테스트 (deprecated 함수)', async (t) => {
 test('signOut 함수 테스트', async (t) => {
   await t.test('토큰 무효화', async () => {
     try {
-      const module = await import('../../../app/lib/firebaseAdmin');
+      const module = await import('../../../app/lib/firebaseAdmin.js');
       
       // signOut 함수 실행 (에러 없이 완료되어야 함)
       await assert.doesNotReject(
@@ -124,7 +124,7 @@ test('signOut 함수 테스트', async (t) => {
 
 test('Firebase 에러 처리 테스트', async (t) => {
   await t.test('FirebaseAuthError 타입 가드', async () => {
-    const module = await import('../../../app/lib/firebaseAdmin');
+    const module = await import('../../../app/lib/firebaseAdmin.js');
     
     // 에러 객체 생성
     const firebaseError = {

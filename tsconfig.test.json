@@ -1,0 +1,33 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "sourceMap": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "types": ["node"],
+    "allowJs": false,
+    "baseUrl": ".",
+    "paths": { "@/*": ["./*"] }
+  },
+  "include": [
+    "__tests__/**/*",
+    "tests/**/*",
+    "app/lib/**/*",
+    "app/api/**/*",
+    "services/**/*",
+    "types/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    "dist",
+    "app/components/**/*",
+    "app/**/page.tsx",
+    "app/**/layout.tsx",
+    "app/layout.tsx",
+    "app/login/**/*"
+  ]
+}

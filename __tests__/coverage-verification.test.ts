@@ -19,7 +19,7 @@ test('실제 커버리지 검증', async (t) => {
     
     try {
       // Firebase Admin 함수들이 실제로 호출되는지 확인
-      const { initializeFirebaseAdmin, verifyToken, signOut } = await import('../app/lib/firebaseAdmin');
+      const { initializeFirebaseAdmin, verifyToken, signOut } = await import('../app/lib/firebaseAdmin.js');
       
       // 각 함수 존재 확인
       assert.ok(typeof initializeFirebaseAdmin === 'function', 'initializeFirebaseAdmin 함수 존재'); executedLines++; totalLines++;
@@ -39,7 +39,7 @@ test('실제 커버리지 검증', async (t) => {
     let testedLogic = 0;
     
     try {
-      const utilsModule = await import('../app/lib/utils');
+      const utilsModule = await import('../app/lib/utils.js');
       
       // hasPermission 함수 실제 실행
       if (typeof utilsModule.hasPermission === 'function') {

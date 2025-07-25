@@ -12,6 +12,75 @@ export interface PagePermission {
 
 // Static page permissions configuration
 export const pagePermissions: PagePermission[] = [
+  // Public pages
+  {
+    path: '/',
+    allowedRoles: [],
+    isPublic: true
+  },
+  {
+    path: '/login*',
+    allowedRoles: [],
+    isPublic: true
+  },
+  {
+    path: '/_Index_of_Root*',
+    allowedRoles: [],
+    isPublic: true
+  },
+  {
+    path: '/unauthorized',
+    allowedRoles: [],
+    isPublic: true
+  },
+  // Admin only pages
+  {
+    path: '/1. 일지*',
+    allowedRoles: [UserRole.ADMIN],
+    isPublic: false
+  },
+  {
+    path: '/3. 회사*',
+    allowedRoles: [UserRole.ADMIN],
+    isPublic: false
+  },
+  {
+    path: '/*/_Index_of_커리어*',
+    allowedRoles: [UserRole.ADMIN],
+    isPublic: false
+  },
+  {
+    path: '/7. 생각정리/커리어*',
+    allowedRoles: [UserRole.ADMIN],
+    isPublic: false
+  },
+  {
+    path: '/*/_Index_of_99.일기*',
+    allowedRoles: [UserRole.ADMIN],
+    isPublic: false
+  },
+  {
+    path: '/97. 보안 폴더*',
+    allowedRoles: [UserRole.ADMIN],
+    isPublic: false
+  },
+  {
+    path: '/99. 일기*',
+    allowedRoles: [UserRole.ADMIN],
+    isPublic: false
+  },
+  {
+    path: '/98. 미분류*',
+    allowedRoles: [UserRole.ADMIN],
+    isPublic: false
+  },
+  // Admin and verified users
+  {
+    path: '/8. 루틴*',
+    allowedRoles: [UserRole.ADMIN, UserRole.VERIFIED],
+    isPublic: false
+  },
+  // Legacy paths
   {
     path: '/admin/*',
     allowedRoles: [UserRole.ADMIN],
