@@ -3,7 +3,7 @@ import { JSDOM } from "jsdom";
 
 export function sanitizeHtml(html: string): string {
   const window = new JSDOM("").window;
-  const purify = DOMPurify(window as DOMPurify.WindowLike);
+  const purify = DOMPurify(window);
   return purify.sanitize(html);
 }
 

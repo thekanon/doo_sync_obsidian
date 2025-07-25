@@ -1,6 +1,6 @@
 // JSDOM Window type extension for DOMPurify compatibility
 declare module 'jsdom' {
-  interface DOMWindow {
+  interface DOMWindow extends DOMPurify.WindowLike {
     trustedTypes?: unknown;
   }
 }
@@ -10,6 +10,14 @@ declare global {
   namespace DOMPurify {
     interface WindowLike {
       [key: string]: unknown;
+      document?: Document;
+      DocumentFragment?: typeof DocumentFragment;
+      HTMLTemplateElement?: typeof HTMLTemplateElement;
+      Node?: typeof Node;
+      Element?: typeof Element;
+      HTMLFormElement?: typeof HTMLFormElement;
+      HTMLTemplateElement?: typeof HTMLTemplateElement;
+      trustedTypes?: unknown;
     }
   }
 }
