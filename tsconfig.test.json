@@ -18,6 +18,7 @@
     "app/lib/**/*",
     "app/api/**/*",
     "services/**/*",
+    "**/*.d.ts",
     "types/**/*.d.ts"
   ],
   "exclude": [
