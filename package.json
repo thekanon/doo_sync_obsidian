@@ -8,8 +8,7 @@
     "start": "next start -p 33000",
     "lint": "next lint",
     "clean": "rimraf dist coverage .nyc_output",
-        "build:test": "tsc -p tsconfig.test.json && tsc-alias -p tsconfig.test.json",
-
+    "build:test": "tsc -p tsconfig.test.json && tsc-alias -p tsconfig.test.json",
     "pretest": "npm run build:test",
     "test": "node --test --import ./dist/__tests__/setup.js \"dist/__tests__/**/*.test.js\"",
     "pretest:unit": "npm run build:test",
@@ -18,8 +17,7 @@
     "test:integration": "node --test --import ./dist/__tests__/setup.js \"dist/__tests__/integration/**/*.test.js\"",
     "pretest:components": "npm run build:test",
     "test:components": "node --test --import ./dist/__tests__/setup.js \"dist/__tests__/components/**/*.test.js\"",
-        "pretest:all": "npm run build:test",
-
+    "pretest:all": "npm run build:test",
     "test:all": "node --test --import ./dist/__tests__/setup.js \"dist/__tests__/**/*.test.js\"",
     "pretest:coverage": "npm run build:test",
     "test:coverage": "c8 -r text -r html -r lcov --all --include \"app/**/*.ts\" --include \"services/**/*.ts\" npm run test:all",
@@ -39,6 +37,7 @@
     "firebase-admin": "^12.6.0",
     "firebaseui": "^6.1.0",
     "geist": "^1.3.1",
+    "isomorphic-dompurify": "^2.26.0",
     "jsdom": "^25.0.0",
     "lucide-react": "^0.459.0",
     "marked": "^14.1.2",
