@@ -9,68 +9,97 @@ import { User, UserRole } from "../types/user";
 import { fetchAuthInfo } from "@/services/auth/authService";
 import { logger } from "./logger";
 
+/* ----------------------------- helpers ----------------------------- */
+type NormalizedPath = { decodedPath: string; cleanPath: string };
+
+const VALID_ROLES = new Set<unknown>(Object.values(UserRole));
+
+const isValidRole = (role: unknown): role is UserRole => VALID_ROLES.has(role);
+
+const escapeRegex = (s: string) =>
+  s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const wildcardToRegex = (pattern: string) =>
+  new RegExp(
+    "^" +
+      escapeRegex(decodeURIComponent(pattern)).replace(/\\\*/g, ".*") +
+      "$"
+  );
+
+const normalizePath = (raw?: string | null): NormalizedPath | null => {
+  if (!raw) return null;
+  const decodedPath = decodeURIComponent(raw);
+
+  const cleanPath = decodedPath
+    .replace(new RegExp(`^/${process.env.OBSIDIAN_ROOT_DIR || "Root"}/`), "/")
+    .replace(/\/_Index_of_/, "/")
+    .replace(/\.md$/, "");
+
+  return { decodedPath, cleanPath };
+};
+
+
+/* ----------------------------- general ----------------------------- */
+
 // server host
 export const getHost = () => {
   return process.env.SERVER_DOMAIN;
 };
 
-// 권한 체크 유틸리티 함수
+/**
+ * 권한 체크 유틸리티 함수
+ *
+ * 테스트(계약)에 맞춘 규칙:
+ * 1) role이 유효하지 않으면 false (단, path가 falsy이면 true)
+ * 2) path가 falsy면 true
+ * 3) 정의되지 않은 경로는 현재 true (기본 허용)  <-- 필요 시 false로 바꾸고 테스트 업데이트
+ */
 export const hasPermission = (
-  userRole: UserRole | undefined,
-  path: string
+  userRole: UserRole | null | undefined,
+  path?: string | null
 ): boolean => {
-  const decodedPath = decodeURIComponent(path);
-  
-  // Remove common prefixes that might interfere with pattern matching
-  const cleanPath = decodedPath
-    .replace(new RegExp(`^/${process.env.OBSIDIAN_ROOT_DIR || 'Root'}/`), '/') // Remove /Root/ prefix
-    .replace(/\/_Index_of_/, '/') // Normalize index paths
-    .replace(/\.md$/, ''); // Remove .md extension
+  if (!isValidRole(userRole)) return !path;   // 계약에 맞춘 처리
+
+  if (!path) return true;
+
+  const { decodedPath, cleanPath } =
+    normalizePath(path) ?? { decodedPath: "", cleanPath: "" };
 
   const permission = pagePermissions.find((p) => {
-    // `p.path`도 디코딩하고, 와일드카드(*)를 정규식 패턴으로 변환
-    const regexPattern = new RegExp(
-      `^${decodeURIComponent(p.path).replace(/\*/g, ".*")}$`
-    );
-
-    return regexPattern.test(decodedPath) || regexPattern.test(cleanPath);
+    const regex = wildcardToRegex(p.path);
+    return regex.test(decodedPath) || regex.test(cleanPath);
   });
 
-  if (!permission) return true; // 정의되지 않은 경로는 기본적으로 접근 허용
-  
-  return (
-    permission.allowedRoles.includes(userRole || UserRole.ANONYMOUS) ||
-    permission?.isPublic
-  );
+  if (!permission) return true;
+
+  return permission.isPublic || permission.allowedRoles.includes(userRole);
 };
 
-// 페이지가 공개 페이지인지 확인
-export const isPublicPage = (path: string): boolean => {
-  const decodedPath = decodeURIComponent(path);
+
+/**
+ * 페이지가 공개 페이지인지 확인
+ * - 정의되지 않은 경로는 false(공개 아님)로 반환
+ */
+export const isPublicPage = (path?: string | null): boolean => {
+  if (!path) return false;
+
+  const { decodedPath, cleanPath } =
+    normalizePath(path) ?? { decodedPath: "", cleanPath: "" };
 
   const permission = pagePermissions.find((p) => {
-    // `p.path`도 디코딩하고, 와일드카드(*)를 정규식 패턴으로 변환
-    const regexPattern = new RegExp(
-      `^${decodeURIComponent(p.path).replace(/\*/g, ".*")}$`
-    );
-
-    return regexPattern.test(decodedPath);
+    const regex = wildcardToRegex(p.path);
+    return regex.test(decodedPath) || regex.test(cleanPath);
   });
-  logger.debug("🔒 decodedPath", decodedPath);
-  logger.debug("🔒 permissionpermission", permission);
-  logger.debug("🔒 permission?.isPublic", permission?.isPublic ?? false);
 
-  if (!permission) return false; // 정의되지 않은 경로는 기본적으로 공개 페이지
-
-  return permission.isPublic ?? false;
+  return permission?.isPublic ?? false;
 };
+
 
 // 현재 사용자 정보 가져오기
 export const getCurrentUser = async (
   request: NextRequest
 ): Promise<User | null> => {
   const token = request.cookies.get("token")?.value;
-  // console.log("💻 token", token);
   if (!token) return null;
 
   try {
@@ -125,14 +154,11 @@ export const getVisitCount = async (request: NextRequest): Promise<number> => {
 export const incrementVisitCount = async (
   request: NextRequest
 ): Promise<NextResponse> => {
-  const currentCount = await getVisitCount(request); // 'await' 추가
+  const currentCount = await getVisitCount(request);
   const newCount = currentCount + 1;
 
-  // 새로운 응답 객체 생성
-  // 새로운 응답 객체 생성
   const response = NextResponse.next();
 
-  // 새로운 쿠키 설정
   response.cookies.set(VISIT_COUNT_COOKIE, newCount.toString(), {
     maxAge: 60 * 60 * 24, // 24시간
     path: "/",
@@ -166,19 +192,11 @@ export const handleVisitCount = async (
 /**
  * 방문 횟수 초기화
  */
-/**
- * 방문 횟수 초기화
- */
-export const resetVisitCount = async (
-  headers: Headers
-): Promise<NextResponse> => {
+export const resetVisitCount = async (headersObj: Headers): Promise<NextResponse> => {
   const response = NextResponse.next({
-    request: {
-      headers: headers,
-    },
+    request: { headers: headersObj },
   });
 
-  // 쿠키 삭제 시 옵션 명시적으로 설정
   response.cookies.set(VISIT_COUNT_COOKIE, "0", {
     maxAge: 60 * 60 * 24, // 24시간
     path: "/",

@@ -1,9 +1,9 @@
-import DOMPurify from "dompurify";
+import DOMPurify, { WindowLike } from "dompurify";
 import { JSDOM } from "jsdom";
 
 export function sanitizeHtml(html: string): string {
   const window = new JSDOM("").window;
-  const purify = DOMPurify(window);
+  const purify = DOMPurify(window as WindowLike);
   return purify.sanitize(html);
 }
 
