@@ -94,6 +94,38 @@ export const isPublicPage = (path?: string | null): boolean => {
   return permission?.isPublic ?? false;
 };
 
+/**
+ * Edge Runtime 호환 공개 페이지 체크
+ * 미들웨어에서 사용 가능한 간단한 경로 기반 체크
+ */
+export const isPublicPathEdge = (path: string): boolean => {
+  const publicPaths = [
+    '/login',
+    '/unauthorized',
+    '/robots.txt',
+    '/sitemap.xml',
+    '/_next',
+    '/api',
+    '/favicon.ico',
+  ];
+
+  return publicPaths.some(publicPath => path.startsWith(publicPath));
+};
+
+/**
+ * Edge Runtime 호환 권한 체크
+ * 미들웨어에서 간단한 인증 여부만 확인
+ */
+export const hasPermissionEdge = (isAuthenticated: boolean, path: string): boolean => {
+  // 공개 페이지는 항상 허용
+  if (isPublicPathEdge(path)) {
+    return true;
+  }
+
+  // 비공개 페이지는 인증이 필요
+  return isAuthenticated;
+};
+
 
 // 현재 사용자 정보 가져오기
 export const getCurrentUser = async (
@@ -122,7 +154,7 @@ export const getCurrentUser = async (
     logger.debug("⭐️ user", user);
     return user;
   } catch (error) {
-    console.error("Error getting current user:", error);
+    logger.error("Error getting current user:", error);
     return null;
   }
 };
@@ -136,7 +168,7 @@ export async function getServerUser(): Promise<User | null> {
     if (!user) return null;
     return JSON.parse(user) as User;
   } catch (error) {
-    console.error("Error parsing user from headers:", error);
+    logger.error("Error parsing user from headers:", error);
     return null;
   }
 }

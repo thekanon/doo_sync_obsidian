@@ -194,7 +194,11 @@ const verifyGithubWebhook = (req: NextRequest, body: string): boolean => {
 
   const hmac = crypto.createHmac("sha256", GITHUB_WEBHOOK_SECRET);
   const digest = "sha256=" + hmac.update(body).digest("hex");
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
+  
+  const sigBuffer = new Uint8Array(Buffer.from(signature, 'utf8'));
+  const digestBuffer = new Uint8Array(Buffer.from(digest, 'utf8'));
+  
+  return crypto.timingSafeEqual(sigBuffer, digestBuffer);
 };
 
 export async function POST(

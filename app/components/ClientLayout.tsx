@@ -1,11 +1,12 @@
 "use client";
 import React, { memo, Suspense } from "react";
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 import { usePreloader } from "../hooks/usePreloader";
 
 // Static imports for critical above-the-fold components
 import Header from "./Header";
-import Breadcrumbs from "./Breadcrumbs";
+import Breadcrumbs from "./navigation/Breadcrumbs";
 
 // Dynamic imports for below-the-fold components with SSR support
 const LeftSidebar = dynamic(() => import("./LeftSidebar"), {
@@ -44,14 +45,16 @@ const MemoizedBreadcrumbs = memo(Breadcrumbs);
 
 export default function ClientLayout({ children }: ClientLayoutProps) {
   console.log('ClientLayout mounted!'); // Debug log
-  
+
+  const pathname = usePathname();
+
   // Preload critical data immediately on layout mount
   usePreloader();
-  
+
   return (
     <>
       <MemoizedHeader />
-      <MemoizedBreadcrumbs />
+      <MemoizedBreadcrumbs pathname={pathname} />
 
       {/* Main Layout Container */}
       <div className="flex flex-1 max-w-full lg:max-w-[1920px] mx-auto w-full overflow-hidden">
