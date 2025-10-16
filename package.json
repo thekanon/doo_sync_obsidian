@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 33000",
+    "dev": "next dev -p ${DEV_PORT:-33000}",
     "build": "next build",
-    "start": "next start -p 33000",
+    "start": "next start -p ${PROD_PORT:-33001}",
     "lint": "next lint",
     "clean": "rimraf dist coverage .nyc_output",
     "build:test": "tsc -p tsconfig.test.json && tsc-alias -p tsconfig.test.json",

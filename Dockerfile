@@ -48,8 +48,9 @@ COPY --from=builder /app/.next/static ./.next/static
 # Set the correct permissions
 USER nextjs
 
-EXPOSE 33000
+EXPOSE 33001
 
-ENV PORT=33000
+ENV PORT=33001
+ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["sh", "-c", "PORT=33001 node server.js"]

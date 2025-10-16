@@ -26,7 +26,7 @@ export function useFirebaseAuth() {
           // 사용자가 로그인함
           user
             .getIdToken()
-            .then((accessToken) => {
+            .then(() => {
               logger.client.debug("사용자 토큰 획득 성공");
               setUser(user);
               setLoading(false);

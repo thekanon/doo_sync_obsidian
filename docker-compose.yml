@@ -7,18 +7,6 @@ services:
     container_name: doo-sync-obsidian
     env_file: [ .env.docker ]
     ports:
-      - "33000:33000"
+      - "33001:33001"
     restart: unless-stopped
     # 운영 실행 시 기본(빌드된 standalone 사용)
-
-  web-dev:
-    image: node:20-alpine
-    container_name: doo-sync-obsidian-dev
-    working_dir: /app
-    volumes:
-      - .:/app
-    command: sh -c "npm install && npm run dev"
-    env_file: [ .env.docker ]
-    ports:
-      - "33001:33000"   # 개발용 포트 분리
-    restart: unless-stopped
