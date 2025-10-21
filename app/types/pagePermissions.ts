@@ -74,6 +74,27 @@ export const pagePermissions: PagePermission[] = [
     allowedRoles: [UserRole.ADMIN],
     isPublic: false
   },
+  // Public knowledge and project pages
+  {
+    path: '/2. 지식*',
+    allowedRoles: [],
+    isPublic: true
+  },
+  {
+    path: '/4. 독서*',
+    allowedRoles: [],
+    isPublic: true
+  },
+  {
+    path: '/5. 프로젝트*',
+    allowedRoles: [],
+    isPublic: true
+  },
+  {
+    path: '/6. 블로그*',
+    allowedRoles: [],
+    isPublic: true
+  },
   // Admin and verified users
   {
     path: '/8. 루틴*',

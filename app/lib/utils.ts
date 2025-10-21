@@ -19,12 +19,15 @@ const isValidRole = (role: unknown): role is UserRole => VALID_ROLES.has(role);
 const escapeRegex = (s: string) =>
   s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const wildcardToRegex = (pattern: string) =>
-  new RegExp(
-    "^" +
-      escapeRegex(decodeURIComponent(pattern)).replace(/\\\*/g, ".*") +
-      "$"
-  );
+const wildcardToRegex = (pattern: string) => {
+  try {
+    const escapedPattern = escapeRegex(pattern).replace(/\\\*/g, ".*");
+    return new RegExp("^" + escapedPattern + "$");
+  } catch (error) {
+    console.error(`Error creating regex for pattern: ${pattern}`, error);
+    return new RegExp("^$"); // 매칭되지 않는 빈 패턴
+  }
+};
 
 const normalizePath = (raw?: string | null): NormalizedPath | null => {
   if (!raw) return null;
@@ -58,8 +61,6 @@ export const hasPermission = (
   userRole: UserRole | null | undefined,
   path?: string | null
 ): boolean => {
-  if (!isValidRole(userRole)) return !path;   // 계약에 맞춘 처리
-
   if (!path) return true;
 
   const { decodedPath, cleanPath } =
@@ -70,9 +71,22 @@ export const hasPermission = (
     return regex.test(decodedPath) || regex.test(cleanPath);
   });
 
-  if (!permission) return true;
+  if (!permission) {
+    // No specific permission rule found, allow access
+    return true;
+  }
 
-  return permission.isPublic || permission.allowedRoles.includes(userRole);
+  // For public pages, allow access regardless of user role (including null/undefined)
+  if (permission.isPublic) {
+    return true;
+  }
+
+  // For private pages, check if user role is in allowed roles
+  if (!userRole || !isValidRole(userRole)) {
+    return false;
+  }
+
+  return permission.allowedRoles.includes(userRole);
 };
 
 
@@ -103,7 +117,8 @@ export const getCurrentUser = async (
   if (!token) return null;
 
   try {
-    const user = await fetchAuthInfo(token);
+    const authInfo = await fetchAuthInfo();
+    const user = authInfo.user;
 
     if (user) {
       // env파일에 있는 NEXT_PUBLIC_ADMIN_EMAIL과 같은지 확인
@@ -116,13 +131,15 @@ export const getCurrentUser = async (
       } else {
         user.role = UserRole.GUEST;
       }
+      logger.debug("⭐️ user", user);
+      return user;
     } else {
-      throw new Error("User not found");
+      console.log("🔒 user null");
+      return null;
     }
-    logger.debug("⭐️ user", user);
-    return user;
   } catch (error) {
     console.error("Error getting current user:", error);
+    console.log("🔒 user null");
     return null;
   }
 };
@@ -176,14 +193,24 @@ export const incrementVisitCount = async (
 export const handleVisitCount = async (
   request: NextRequest
 ): Promise<NextResponse | null> => {
+  // 공개 페이지인지 먼저 확인
+  const isPublic = isPublicPage(request.nextUrl.pathname);
+  
+  // 공개 페이지는 방문 횟수 제한을 적용하지 않음
+  if (isPublic) {
+    console.log("🌍 Public page - skipping visit count check");
+    return NextResponse.next();
+  }
+
   const currentCount = await getVisitCount(request);
 
   // 비공개 페이지이고 방문 횟수가 제한을 넘은 경우
-  if (currentCount >= 10 && !isPublicPage(request.nextUrl.pathname)) {
+  if (currentCount >= 10) {
+    console.log(`🚫 Visit limit exceeded for private page: ${currentCount}/10`);
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
 
-  // 방문 횟수 증가
+  // 방문 횟수 증가 (비공개 페이지만)
   const response = await incrementVisitCount(request);
 
   return response;

@@ -55,6 +55,26 @@
     "isPublic": false
   },
   {
+    "path": "/2. 지식*",
+    "allowedRoles": [],
+    "isPublic": true
+  },
+  {
+    "path": "/4. 독서*",
+    "allowedRoles": [],
+    "isPublic": true
+  },
+  {
+    "path": "/5. 프로젝트*",
+    "allowedRoles": [],
+    "isPublic": true
+  },
+  {
+    "path": "/6. 블로그*",
+    "allowedRoles": [],
+    "isPublic": true
+  },
+  {
     "path": "/8. 루틴*",
     "allowedRoles": ["ADMIN", "VERIFIED"],
     "isPublic": false
