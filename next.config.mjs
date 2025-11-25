@@ -3,6 +3,7 @@ const nextConfig = {
   productionBrowserSourceMaps: false, // Reduce build size for production
   compress: true,
   poweredByHeader: false,
+  output: 'standalone', // Enable standalone output for Docker
   
   // Optimize worker configuration for deployment
   experimental: {

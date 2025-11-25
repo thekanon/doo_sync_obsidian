@@ -2,6 +2,7 @@ import React from "react";
 import { getHost, getServerUser } from "@/app/lib/utils";
 import { DirectoryFile } from "@/app/lib/obsidian/parser";
 import ContentRenderer from "@/app/components/content/ContentRenderer";
+import { logger } from "@/app/lib/logger";
 
 type Params = {
   slug: string[];
@@ -45,7 +46,7 @@ export default async function Page({ params }: { params: Params }) {
       </div>
     );
   } catch (error: unknown) {
-    console.error("Error in Home component:", error);
+    logger.error("Error in Page component:", { path: params.slug.join("/"), error });
     return (
       <div className="prose prose-lg p-3">
         없는 문서이거나 아직 작성되지 않았습니다.
